@@ -13,7 +13,7 @@ using Newtonsoft.Json.Linq;
 using RestSharp;
 using S3Downloader;
 
-namespace SyncTray
+namespace Bootlegger.Sync.Lib
 {
 	class Engine
 	{
@@ -416,11 +416,13 @@ namespace SyncTray
 			{
 				thetotal = 0;
 
+
 				CalcTotals(allmedia);
 				done = exists;
 				//total.Text = thetotal.ToString();
 				//down.Text = exists.ToString();
 				OnUpdateNumbers?.Invoke(thetotal, 0, exists);
+				OnStatusUpdate?.Invoke("Syncing...");
 
 				IsRunning = true;
 				scheduler = new System.Timers.Timer();
@@ -534,10 +536,11 @@ namespace SyncTray
 
 									//var ss = Resources.spacer
 
-									string rstr = _responderMethod(ctx.Request);
+									_responderMethod(ctx.Request);
 									//byte[] buf = Encoding.UTF8.GetBytes(rstr);
 									var assembly = System.Reflection.Assembly.GetExecutingAssembly();
-									using (var stream = assembly.GetManifestResourceStream("SyncTray.spacer.gif"))
+									//Console.WriteLine(assembly.GetName().Name);
+									using (var stream = assembly.GetManifestResourceStream(assembly.GetName().Name +".spacer.gif"))
 									{
 										byte[] buffer = new byte[stream.Length];
 										stream.Read(buffer, 0, buffer.Length);
@@ -577,8 +580,6 @@ namespace SyncTray
 			}
 		}
 	}
-
-
 
 
 }

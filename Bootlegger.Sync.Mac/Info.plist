@@ -1,11 +1,11 @@
-﻿<?xml version="1.0" encoding="UTF-8"?>
+<?xml version="1.0" encoding="UTF-8"?>
 <!DOCTYPE plist PUBLIC "-//Apple//DTD PLIST 1.0//EN" "http://www.apple.com/DTDs/PropertyList-1.0.dtd">
 <plist version="1.0">
 <dict>
 	<key>CFBundleName</key>
 	<string>Bootlegger Sync</string>
 	<key>CFBundleIdentifier</key>
-	<string>tv.bootlegger.syncclient.mac.bootlegger-sync</string>
+	<string>tv.bootlegger.sync.mac</string>
 	<key>CFBundleShortVersionString</key>
 	<string>1.0</string>
 	<key>CFBundleVersion</key>
@@ -21,13 +21,14 @@
 	<key>CFBundleSignature</key>
 	<string>????</string>
 	<key>NSHumanReadableCopyright</key>
-	<string>tom</string>
+	<string>Newcastle University</string>
 	<key>NSPrincipalClass</key>
 	<string>NSApplication</string>
 	<key>NSMainStoryboardFile</key>
 	<string>Main</string>
 	<key>XSAppIconAssets</key>
 	<string>Assets.xcassets/AppIcons.appiconset</string>
-	
+	<key>LSApplicationCategoryType</key>
+	<string>public.app-category.video</string>
 </dict>
 </plist>

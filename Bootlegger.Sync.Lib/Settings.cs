@@ -1,13 +1,8 @@
 ﻿using Amazon;
-using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
 
-namespace SyncTray
+namespace Bootlegger.Sync.Lib
 {
-    public class Settings
+	public class Settings
     {
         public const string S3ID = "AKIAJJJ5WKR46X6URJNA";
         public const string S3KEY = "HBDdh9nYI8EajSfeyvdMwiXjO66T2YPZi3g3xPLb";

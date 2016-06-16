@@ -1,6 +1,6 @@
 ﻿using AppKit;
 
-namespace BootleggerSyncMac
+namespace Bootlegger.Sync.Mac
 {
 	static class MainClass
 	{
@@ -8,6 +8,7 @@ namespace BootleggerSyncMac
 		{
 			NSApplication.Init();
 			NSApplication.Main(args);
+			
 		}
 	}
 }

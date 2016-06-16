@@ -7,7 +7,6 @@ using Amazon.S3;
 using Amazon.S3.Model;
 using System.Collections.Concurrent;
 using System.Threading;
-using System.Threading.Tasks;
 
 namespace S3Downloader
 {
@@ -746,7 +745,8 @@ namespace S3Downloader
                     p.InputStream = stream;
 
                     p.StorageClass = useReducedRedundancy ? S3StorageClass.ReducedRedundancy : S3StorageClass.Standard;
-					var response = Task.WhenAll(_client.PutObjectAsync(p));
+
+                    var response = _client.PutObject(p);
                 
                 }
                 return true;

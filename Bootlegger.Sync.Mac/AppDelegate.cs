@@ -1,7 +1,7 @@
 ﻿using AppKit;
 using Foundation;
 
-namespace BootleggerSyncMac
+namespace Bootlegger.Sync.Mac
 {
 	[Register("AppDelegate")]
 	public class AppDelegate : NSApplicationDelegate
