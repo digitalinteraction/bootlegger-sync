@@ -18,10 +18,22 @@ namespace Bootlegger.Sync.Mac
 		{
 			base.ViewDidLoad();
 			cancelbtn.Enabled = false;
+			//xmp.ToolTip = "You will need to install exiftool to use this option";
 
 
 			// Do any additional setup after loading the view.
 			engine = new Engine();
+			if (engine.CanXMP)
+			{
+				xmp.Enabled = true;
+			}
+			else
+			{
+				xmp.Enabled = false;
+				
+				xmp.Title = "Install exiftool to enable XMP export";
+			}
+
 			engine.OnSignin += () =>
 			{
 				BeginInvokeOnMainThread(new Action(() =>

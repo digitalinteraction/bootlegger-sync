@@ -22,10 +22,10 @@
     <ErrorReport>prompt</ErrorReport>
     <WarningLevel>4</WarningLevel>
     <ConsolePause>false</ConsolePause>
-    <EnableCodeSigning>true</EnableCodeSigning>
+    <EnableCodeSigning>false</EnableCodeSigning>
     <CodeSigningKey>3rd Party Mac Developer Application: University of Newcastle upon Tyne (J3676MPZ85)</CodeSigningKey>
     <CreatePackage>true</CreatePackage>
-    <EnablePackageSigning>true</EnablePackageSigning>
+    <EnablePackageSigning>false</EnablePackageSigning>
     <IncludeMonoRuntime>false</IncludeMonoRuntime>
     <UseSGen>true</UseSGen>
     <UseRefCounting>true</UseRefCounting>
@@ -90,6 +90,13 @@
     <ImageAsset Include="Assets.xcassets\AppIcons.appiconset\AppIcon-512.png" />
     <ImageAsset Include="Assets.xcassets\AppIcons.appiconset\AppIcon-512%402x.png" />
     <ImageAsset Include="Assets.xcassets\Contents.json" />
+    <ImageAsset Include="Assets.xcassets\AppIcons.appiconset\1024.png" />
+    <ImageAsset Include="Assets.xcassets\AppIcons.appiconset\512.png" />
+    <ImageAsset Include="Assets.xcassets\AppIcons.appiconset\256.png" />
+    <ImageAsset Include="Assets.xcassets\AppIcons.appiconset\128.png" />
+    <ImageAsset Include="Assets.xcassets\AppIcons.appiconset\64.png" />
+    <ImageAsset Include="Assets.xcassets\AppIcons.appiconset\32.png" />
+    <ImageAsset Include="Assets.xcassets\AppIcons.appiconset\16.png" />
   </ItemGroup>
   <ItemGroup>
     <None Include="Info.plist" />

@@ -276,8 +276,11 @@ namespace Bootlegger.Sync.Lib
 							info.FileName = "exiftool.exe";
 							break;
 						case PlatformID.Unix:
-							info.FileName = "exiftool";
+							info.FileName = "/usr/local/bin/exiftool";
 							break;
+						//case PlatformID.MacOSX:
+							//info.FileName = "/usr/local/bin/exiftool";
+							//break;
 						default:
 							info.FileName = "exiftool";
 							break;
@@ -461,7 +464,48 @@ namespace Bootlegger.Sync.Lib
 			WebServer web = new WebServer(SendResponse, "http://localhost:8664/signin/");
 			web.Run();
 			ServicePointManager.ServerCertificateValidationCallback += (sender, cert, chain, sslPolicyErrors) => true;
+			OperatingSystem os = Environment.OSVersion;
+			PlatformID pid = os.Platform;
+			if (pid == PlatformID.Unix)
+			{
+				//Console.WriteLine(File.Exists("exiftool"))
+				//var proc = new ProcessStartInfo("sh","-c 'which exiftool'");
+				var proc = new ProcessStartInfo("/usr/local/bin/exiftool","-ver");
+
+				proc.RedirectStandardOutput = true;
+				proc.RedirectStandardError = true;
+				proc.UseShellExecute = false;
+				//proc.WorkingDirectory = Directory.GetCurrentDirectory();
+				try
+				{
+					var appexists = Process.Start(proc);
+					CanXMP = true;
+				}
+				catch
+				{
+					CanXMP = false;
+				}
+				//appexists.BeginOutputReadLine();
+				//appexists.BeginErrorReadLine();
+
+				//appexists.WaitForExit();
+				//Console.WriteLine(appexists.ExitCode);
+				//string output = appexists.StandardOutput.ReadToEnd();
+				//Console.WriteLine(output);
+				//output = appexists.StandardError.ReadToEnd();
+				//Console.WriteLine(output);
+				//appexists.WaitForExit();
+				//if (output.Length > 0)
+					
+			}
+			else
+			{
+				CanXMP = true;
+			}
+
 		}
+
+		public bool CanXMP { get; set; }
 
 		public event Action OnSignin;
 
