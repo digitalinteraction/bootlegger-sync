@@ -8,18 +8,14 @@
 	<string>tv.bootlegger.sync.mac</string>
 	<key>CFBundleShortVersionString</key>
 	<string>1.0</string>
-	<key>CFBundleVersion</key>
-	<string>1</string>
 	<key>LSMinimumSystemVersion</key>
-	<string>10.11</string>
+	<string>10.7</string>
 	<key>CFBundleDevelopmentRegion</key>
 	<string>en</string>
 	<key>CFBundleInfoDictionaryVersion</key>
 	<string>6.0</string>
 	<key>CFBundlePackageType</key>
 	<string>APPL</string>
-	<key>CFBundleSignature</key>
-	<string>????</string>
 	<key>NSHumanReadableCopyright</key>
 	<string>Newcastle University</string>
 	<key>NSPrincipalClass</key>
@@ -30,5 +26,7 @@
 	<string>public.app-category.video</string>
 	<key>XSAppIconAssets</key>
 	<string>Assets.xcassets/AppIcons.appiconset</string>
+	<key>CFBundleVersion</key>
+	<string>2</string>
 </dict>
 </plist>
