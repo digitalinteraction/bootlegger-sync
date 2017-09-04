@@ -1,5 +1,6 @@
 ﻿using System;
 using System.IO;
+using System.Linq;
 using AppKit;
 using Bootlegger.Sync.Lib;
 using Foundation;
@@ -39,17 +40,18 @@ namespace Bootlegger.Sync.Mac
 				BeginInvokeOnMainThread(new Action(() =>
 				{
 					status.StringValue = "Connected...";
-					gobtn.Enabled = true;
+                    NSApplication.SharedApplication.Windows.First().MakeKeyAndOrderFront(this);
 				}));
 			};
 
+			//waiting, done, total 
 			engine.OnUpdateNumbers += (a1, a2, a3) =>
 			  {
-				  BeginInvokeOnMainThread(new Action(() =>
+                BeginInvokeOnMainThread(new Action(() =>
 				  {
+					  waiting.StringValue = a1.ToString();
+                      downloading.StringValue = a2.ToString();
 					  total.StringValue = a3.ToString();
-					  downloading.StringValue = a2.ToString();
-					  waiting.StringValue = a3.ToString();
 				  }));
 			  };
 			engine.OnSubProgress += (perc) =>

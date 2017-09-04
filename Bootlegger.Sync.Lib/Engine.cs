@@ -34,7 +34,8 @@ namespace Bootlegger.Sync.Lib
 				exists = 0;
 				CalcTotals(allmedia);
 
-				OnUpdateNumbers?.Invoke(exists, thetotal,0);
+				//waiting, done, total
+                OnUpdateNumbers?.Invoke(thetotal-exists, exists, thetotal);
 				done = exists;
 
 				if (!worker.IsBusy)
@@ -42,6 +43,7 @@ namespace Bootlegger.Sync.Lib
 			}
 		}
 
+        //waiting, done, total 
 		public event Action<int, int, int> OnUpdateNumbers;
 
 		JObject allmedia;
@@ -59,12 +61,7 @@ namespace Bootlegger.Sync.Lib
 			else
 			{
 				IsRunning = false;
-				//gobtn.Enabled = true;
-				//cancelbtn.Enabled = false;
 				OnStatusUpdate?.Invoke("Up to date at " + DateTime.Now.ToShortTimeString());
-				//status.Text = ";
-				//MessageBox.Show("Download Complete");
-				//button2.Enabled = true;
 			}
 		}
 
@@ -72,11 +69,7 @@ namespace Bootlegger.Sync.Lib
 
 		void worker_ProgressChanged(object sender, ProgressChangedEventArgs e)
 		{
-			OnUpdateNumbers?.Invoke(thetotal, done,(thetotal - done));
-			////total.Text = thetotal.ToString();
-			////down.Text = done.ToString();
-			//up.Text = (thetotal - done).ToString();
-			//progress.Value = Math.Min(e.ProgressPercentage, 100);
+			OnUpdateNumbers?.Invoke((thetotal - done), done, thetotal);
 			OnProgress?.Invoke(Math.Min(e.ProgressPercentage, 100));
 		}
 
@@ -95,8 +88,6 @@ namespace Bootlegger.Sync.Lib
 
 				foreach (var t in dir.Properties().ToList())
 				{
-					//Directory.CreateDirectory(p + Path.DirectorySeparatorChar + t.Name);
-					//string pp = p + Path.DirectorySeparatorChar + t.Name;
 					if (t.Value != null && !(t.Value is JArray))
 					{
 						CalcTotals(t.Value as JObject);
@@ -130,8 +121,6 @@ namespace Bootlegger.Sync.Lib
 
 			if (dir.Properties() != null)
 			{
-				//var tt = dir.Properties();
-
 				foreach (var t in dir.Properties().ToList())
 				{
 					Directory.CreateDirectory(p + Path.DirectorySeparatorChar + t.Name);
@@ -159,23 +148,16 @@ namespace Bootlegger.Sync.Lib
 
 		void DownloadFile(string filename, string dest, string id)
 		{
-
 			try
 			{
 				//TODO Change back to bootleggertrans
 				AWSS3Helper helper;
 
-
-
 				if (ShouldTranscode)
 					helper = new AWSS3Helper(Settings.S3ID, Settings.S3KEY, Settings.S3TRANSCODEBUCKET, Settings.S3REGION);
 				else
 					helper = new AWSS3Helper(Settings.S3ID, Settings.S3KEY, Settings.S3BUCKET, Settings.S3REGION);
-
-
-
-				//AWSS3Helper transcodehelper = new AWSS3Helper("AKIAJJJ5WKR46X6URJNA", "HBDdh9nYI8EajSfeyvdMwiXjO66T2YPZi3g3xPLb", "bootleggertrans", Amazon.RegionEndpoint.EUWest1);
-
+                
 				//meta data for media item
 				var themeta = (from n in metadata.Children() where n["id"].ToString() == id select n).First() as JObject;
 				//string origpath = "";
@@ -188,8 +170,6 @@ namespace Bootlegger.Sync.Lib
 				{
 
 					//replace normal url with transcode url
-
-					// PUT IN TO QUICKLY AVOID HOMOG -- NEEDS FIXING!
 					if (ShouldTranscode)
 					{
 						origpath += "_homog.mp4";
@@ -243,10 +223,6 @@ namespace Bootlegger.Sync.Lib
 					}
 				}
 
-				//int total = (from n in allmedia where n.ContainsKey("path") select n).Count();
-				//int count = 0;
-				//foreach (Hashtable media in (from n in allmedia where n.ContainsKey("path") select n))
-				//{
 				if (worker.CancellationPending)
 					return;
 
@@ -326,13 +302,6 @@ namespace Bootlegger.Sync.Lib
 					Console.WriteLine(ex);
 				}
 
-				//}
-				//count++;
-				//BeginInvoke((Action)delegate(){
-				//    up.Text = (total - count).ToString();
-				//    down.Text = count.ToString();
-				//});
-
 				done++;
 
 				worker.ReportProgress((int)((done / (double)thetotal) * 100));
@@ -366,17 +335,16 @@ namespace Bootlegger.Sync.Lib
 
 		void helper_OnProgress(object sender, Amazon.S3.Model.WriteObjectProgressArgs e)
 		{
+            worker.ReportProgress((int)(((done + ((double)e.PercentDone / 100)) / (double)thetotal) * 100));
 			OnSubProgress?.Invoke(e.PercentDone);
 		}
-
 
 		async Task DoRefresh()
 		{
 			OnStatusUpdate?.Invoke("Loading Media...");
 			RestSharp.RestClient client = new RestSharp.RestClient();
 			client.BaseUrl = new Uri(theport + "//" + thehostname);
-
-
+           
 			RestSharp.RestRequest request = new RestSharp.RestRequest("/media/directorystructure/" + theeventid + "?template=" + thetemplate + "&apikey=" + Settings.APIKEY);
 			request.AddCookie("sails.sid", Uri.EscapeDataString(thesession).Replace("%20", "%2B"));
 			//request.AddHeader("Cookie", "sails.sid=" + thesession);
@@ -387,26 +355,19 @@ namespace Bootlegger.Sync.Lib
 			allmedia = objects;
 
 			//get all meta-data:
-
 			request = new RestSharp.RestRequest("/media/nicejson/" + theeventid + "?apikey=" + Settings.APIKEY);
 			request.AddCookie("sails.sid", Uri.EscapeDataString(thesession).Replace("%20", "%2B"));
 			result = await client.ExecuteGetTaskAsync(request);
 			metadata = Newtonsoft.Json.JsonConvert.DeserializeObject<JArray>(result.Content);
 
 			OnStatusUpdate?.Invoke("Ready to Sync.");
-			//status.Text = "Ready to Sync.";
-			//up.Content = objects.Count;
 
-			OnUpdateNumbers(0, 0, 0);
-			//up.Text = "-";
-			//down.Text = "-";
-			//thetotal = 0;
+            OnUpdateNumbers?.Invoke(0, 0, 0);
+
 			CalcTotals(allmedia);
-			//total.Text = thetotal.ToString();
-			//up.Text = thetotal.ToString();
-			OnUpdateNumbers(thetotal, 0, thetotal);
 
-			//gobtn.Enabled = true;
+            OnUpdateNumbers?.Invoke(thetotal-exists, exists, thetotal);
+
 			OnEnableGo?.Invoke();
 		}
 
@@ -422,16 +383,14 @@ namespace Bootlegger.Sync.Lib
 
 				CalcTotals(allmedia);
 				done = exists;
-				//total.Text = thetotal.ToString();
-				//down.Text = exists.ToString();
-				OnUpdateNumbers?.Invoke(thetotal, 0, exists);
+
+                OnUpdateNumbers?.Invoke(thetotal-exists, exists, thetotal);
 				OnStatusUpdate?.Invoke("Syncing...");
 
 				IsRunning = true;
 				scheduler = new System.Timers.Timer();
 				scheduler.Elapsed += scheduler_Tick;
-				//scheduler.Tick += scheduler_Tick;
-				//scheduler.Enabled = true;
+
 				scheduler.Interval = 1000 * 60; //5 min intervals
 				scheduler.Start();
 				worker.WorkerSupportsCancellation = true;
@@ -455,8 +414,6 @@ namespace Bootlegger.Sync.Lib
 		 *	Old Engine Code
 		 */
 
-
-
 		//login to bootlegger if not logged in already:
 
 		public Engine()
@@ -468,14 +425,11 @@ namespace Bootlegger.Sync.Lib
 			PlatformID pid = os.Platform;
 			if (pid == PlatformID.Unix)
 			{
-				//Console.WriteLine(File.Exists("exiftool"))
-				//var proc = new ProcessStartInfo("sh","-c 'which exiftool'");
 				var proc = new ProcessStartInfo("/usr/local/bin/exiftool","-ver");
 
 				proc.RedirectStandardOutput = true;
 				proc.RedirectStandardError = true;
 				proc.UseShellExecute = false;
-				//proc.WorkingDirectory = Directory.GetCurrentDirectory();
 				try
 				{
 					var appexists = Process.Start(proc);
@@ -484,19 +438,7 @@ namespace Bootlegger.Sync.Lib
 				catch
 				{
 					CanXMP = false;
-				}
-				//appexists.BeginOutputReadLine();
-				//appexists.BeginErrorReadLine();
-
-				//appexists.WaitForExit();
-				//Console.WriteLine(appexists.ExitCode);
-				//string output = appexists.StandardOutput.ReadToEnd();
-				//Console.WriteLine(output);
-				//output = appexists.StandardError.ReadToEnd();
-				//Console.WriteLine(output);
-				//appexists.WaitForExit();
-				//if (output.Length > 0)
-					
+				}	
 			}
 			else
 			{
@@ -581,9 +523,7 @@ namespace Bootlegger.Sync.Lib
 									//var ss = Resources.spacer
 
 									_responderMethod(ctx.Request);
-									//byte[] buf = Encoding.UTF8.GetBytes(rstr);
 									var assembly = System.Reflection.Assembly.GetExecutingAssembly();
-									//Console.WriteLine(assembly.GetName().Name);
 									using (var stream = assembly.GetManifestResourceStream(assembly.GetName().Name +".spacer.gif"))
 									{
 										byte[] buffer = new byte[stream.Length];
