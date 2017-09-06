@@ -1,0 +1,19 @@
+﻿<ContentControl x:Class="Bootlegger.App.Win.Intro"
+      xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+      xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+      xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006" 
+      xmlns:d="http://schemas.microsoft.com/expression/blend/2008" 
+      xmlns:local="clr-namespace:Bootlegger.App.Win"
+      mc:Ignorable="d" 
+      d:DesignHeight="300" d:DesignWidth="300">
+
+    <Grid>
+        <Label Content="Setup Bootlegger" Height="37.12" Margin="10,10,137.67,0" VerticalAlignment="Top"/>
+        <Grid VerticalAlignment="Bottom" Height="48.157">
+            <Path Data="M0,274.08548 L300.05709,274.08548" Height="0.5" Stretch="Fill" Stroke="White" VerticalAlignment="Top" Opacity="0.5"/>
+            <Button x:Name="continuebtn" Style="{DynamicResource SquareButtonStyle}" Content="Continue" HorizontalAlignment="Right" Margin="0,-4.66,10,10" Width="75" d:LayoutOverrides="Height" VerticalAlignment="Bottom"/>
+
+        </Grid>
+
+    </Grid>
+</ContentControl>

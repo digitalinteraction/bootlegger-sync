@@ -1,0 +1,24 @@
+﻿<ContentControl x:Class="Bootlegger.App.Win.DownloadImages"
+      xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+      xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+                xmlns:Controls="clr-namespace:MahApps.Metro.Controls;assembly=MahApps.Metro"
+      xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006" 
+      xmlns:d="http://schemas.microsoft.com/expression/blend/2008" 
+      xmlns:local="clr-namespace:Bootlegger.App.Win"
+      mc:Ignorable="d" 
+      d:DesignHeight="300" d:DesignWidth="300">
+    <Grid>
+        <StackPanel Orientation="Vertical" Margin="10">
+        <Label Content="Download and Install" Padding="0"/>
+
+        <Controls:MetroProgressBar x:Name="progress" HorizontalAlignment="Stretch" VerticalAlignment="Top" Maximum="1"/>
+        <Label x:Name="progresslabel" Content="Label" HorizontalAlignment="Right" VerticalAlignment="Top" Padding="0"/>
+        <StackPanel x:Name="layersstack" Orientation="Vertical">
+        </StackPanel>
+    </StackPanel>
+    <Grid VerticalAlignment="Bottom" Height="48.157">
+        <Path Data="M0,274.08548 L300.05709,274.08548" Height="0.5" Stretch="Fill" Stroke="White" VerticalAlignment="Top" Opacity="0.5"/>
+            <Button x:Name="continuebtn_Copy" Style="{DynamicResource SquareButtonStyle}" Content="back" HorizontalAlignment="Right" Margin="0,0,215,10.157" Width="75" VerticalAlignment="Bottom" Click="continuebtn_Copy_Click"/>
+        </Grid>
+    </Grid>
+</ContentControl>

@@ -1,0 +1,59 @@
+﻿version: '2'
+volumes:
+  mongo-data:
+    external: false
+  redis-data:
+    external: false
+  upload-data:
+    external: false
+
+services:
+  nginx:
+    image: nginx
+    container_name: nginx
+    restart: always
+    ports:
+      - "80:80"
+    volumes:
+      - "./conf:/etc/nginx/conf.d"
+      - "./bootlegger.conf:/etc/nginx/vhost.d/default"
+      - "/usr/share/nginx/html"
+      - "./certs:/etc/nginx/certs:ro"
+    volumes_from:
+      - web
+
+  nginx-gen:
+    image: jwilder/docker-gen
+    restart: always
+    volumes:
+      - "/var/run/docker.sock:/tmp/docker.sock:ro"
+      - "./nginx.tmpl:/etc/docker-gen/templates/nginx.tmpl:ro"
+    volumes_from:
+      - nginx
+    command: '-notify-sighup nginx -watch -wait 5s:30s /etc/docker-gen/templates/nginx.tmpl /etc/nginx/conf.d/default.conf'
+
+  redis:
+    image: redis:alpine
+    command: redis-server --appendonly yes
+
+  mongo:
+    image: mongo
+
+  beanstalk:
+    image: schickling/beanstalkd
+
+  web:
+    restart: always
+    image: openlab.ncl.ac.uk:4567/bootlegging/server-app:ifrc
+    #build: ../..
+    depends_on: 
+      - redis
+      - mongo
+      - beanstalk
+    volumes:
+      - ./ssl:/usr/src/app/ssl:ro
+      - ./local.js:/usr/src/app/config/local.js:ro
+      - ./media:/usr/src/app/uploads
+    environment:
+      - VIRTUAL_HOST=localhost
+      - NODE_ENV=production
