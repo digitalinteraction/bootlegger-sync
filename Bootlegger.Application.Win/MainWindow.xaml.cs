@@ -15,6 +15,7 @@ using System.Windows.Media;
 using System.Windows.Media.Imaging;
 using System.Windows.Navigation;
 using System.Windows.Shapes;
+using MahApps.Metro.Controls.Dialogs;
 
 namespace Bootlegger.App.Win
 {
@@ -37,24 +38,32 @@ namespace Bootlegger.App.Win
                 this.DragMove();
         }
 
+        bool canexit = false;
+
         private async void MainWindow_Closing(object sender, System.ComponentModel.CancelEventArgs e)
         {
-            if (MessageBox.Show("Closing this application will prevent access to Bootlegger", "Continue?", MessageBoxButton.OKCancel) == MessageBoxResult.OK)
+            if (!canexit)
             {
-                
-                await App.BootleggerApp.StopServer();
-                App.BootleggerApp.StopWifi();
+                e.Cancel = true;
+                var tt = await (App.Current.MainWindow as MetroWindow).ShowMessageAsync("Continue?", "Closing this application will prevent access to Bootlegger", MessageDialogStyle.AffirmativeAndNegative);
+                if (tt == MessageDialogResult.Affirmative)
+                {
+                    canexit = true;
+                    Close();
+                }
+                else
+                    canexit = false;
             }
             else
             {
-                e.Cancel = true;
+                await App.BootleggerApp.StopServer();
+                App.BootleggerApp.StopWifi();
             }
         }
 
         private async void MainWindow_Initialized(object sender, EventArgs e)
         {
             //show progress...
-
             progress.Visibility = Visibility.Visible;
             try
             {
@@ -62,7 +71,8 @@ namespace Bootlegger.App.Win
             }
             catch
             {
-                MessageBox.Show("The connection to Docker has timed out, please restart docker manually.");
+                await (App.Current.MainWindow as MetroWindow).ShowMessageAsync("Message", "The connection to Docker has timed out, please restart docker manually.");
+                //MessageBox.Show("The connection to Docker has timed out, please restart docker manually.");
                 Environment.Exit(1);
             }
             progress.Visibility = Visibility.Hidden;
@@ -71,7 +81,8 @@ namespace Bootlegger.App.Win
             {
                 case Lib.BootleggerApplication.RUNNING_STATE.NOT_SUPORTED:
                     //close with error
-                    MessageBox.Show("This OS is not supported, please try on another system");
+                    await (App.Current.MainWindow as MetroWindow).ShowMessageAsync("Message", "This OS is not supported, please try on another system");
+                    //MessageBox.Show("This OS is not supported, please try on another system");
                     Environment.Exit(1);
                     break;
 

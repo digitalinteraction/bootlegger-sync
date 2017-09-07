@@ -55,7 +55,6 @@ namespace Bootlegger.App.Win
         private async void continuebtn_Copy1_Click(object sender, RoutedEventArgs e)
         {
             //update
-            await App.BootleggerApp.StopServer();
             (Application.Current.MainWindow as MainWindow)._mainFrame.Content = new DownloadImages(true);
         }
     }

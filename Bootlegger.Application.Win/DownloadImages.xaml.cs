@@ -15,6 +15,7 @@ using System.Windows.Media;
 using System.Windows.Media.Imaging;
 using System.Windows.Navigation;
 using System.Windows.Shapes;
+using MahApps.Metro.Controls.Dialogs;
 
 namespace Bootlegger.App.Win
 {
@@ -68,7 +69,14 @@ namespace Bootlegger.App.Win
             App.BootleggerApp.OnDownloadProgress += BootleggerApp_OnDownloadProgress;
             App.BootleggerApp.OnNextDownload += BootleggerApp_OnNextDownload;
 
+
+            progresslabel.Content = "Stopping Applicaton...";
+
+            await App.BootleggerApp.StopServer();
+
             progresslabel.Content = "Initiating Download...";
+
+
             try
             {
                 await App.BootleggerApp.DownloadImages(force, cancel.Token);
@@ -79,7 +87,7 @@ namespace Bootlegger.App.Win
             }
             catch (Exception ef)
             {
-                MessageBox.Show(ef.Message);
+                await (App.Current.MainWindow as MetroWindow).ShowMessageAsync("Error",ef.Message);
             }
         }
 

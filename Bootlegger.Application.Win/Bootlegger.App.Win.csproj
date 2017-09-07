@@ -7,7 +7,7 @@
     <ProjectGuid>{90C52F7F-6BB0-4C96-A303-F3F8DCCF7BC5}</ProjectGuid>
     <OutputType>WinExe</OutputType>
     <RootNamespace>Bootlegger.App.Win</RootNamespace>
-    <AssemblyName>Bootlegger.App.Win</AssemblyName>
+    <AssemblyName>Bootlegger</AssemblyName>
     <TargetFrameworkVersion>v4.6.1</TargetFrameworkVersion>
     <FileAlignment>512</FileAlignment>
     <ProjectTypeGuids>{60dc8134-eba5-43b8-bcc9-bb4bc16c2548};{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}</ProjectTypeGuids>
@@ -35,6 +35,9 @@
   </PropertyGroup>
   <PropertyGroup>
     <ApplicationManifest>app.manifest</ApplicationManifest>
+  </PropertyGroup>
+  <PropertyGroup>
+    <ApplicationIcon>wp8_nYp_icon.ico</ApplicationIcon>
   </PropertyGroup>
   <ItemGroup>
     <Reference Include="Docker.DotNet, Version=2.124.0.0, Culture=neutral, processorArchitecture=MSIL">
@@ -150,6 +153,9 @@
   </ItemGroup>
   <ItemGroup>
     <Resource Include="ic_wifi_white_48dp_2x.png" />
+  </ItemGroup>
+  <ItemGroup>
+    <Resource Include="wp8_nYp_icon.ico" />
   </ItemGroup>
   <Import Project="..\Bootlegger.Application.Lib\Bootlegger.Application.Lib.projitems" Label="Shared" />
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />

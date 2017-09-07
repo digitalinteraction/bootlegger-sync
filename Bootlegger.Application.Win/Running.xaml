@@ -20,6 +20,6 @@
         </StackPanel>
         <Button x:Name="continuebtn" Style="{DynamicResource SquareButtonStyle}" Content="Admin Panel" HorizontalAlignment="Right" Margin="0,0,10,10" BorderThickness="0.5" Padding="8" VerticalAlignment="Bottom" Click="continuebtn_Click" Custom:ControlsHelper.ContentCharacterCasing="Upper"/>
         <Button x:Name="continuebtn_Copy" Style="{DynamicResource SquareButtonStyle}" Content="open Video Files folder" HorizontalAlignment="Right" Margin="0,0,110,10" BorderThickness="0.5" Padding="8" VerticalAlignment="Bottom" Click="continuebtn_Copy_Click" Custom:ControlsHelper.ContentCharacterCasing="Upper"/>
-        <Button x:Name="continuebtn_Copy1" Style="{DynamicResource SquareButtonStyle}" Content="update" HorizontalAlignment="Left" Margin="10" BorderThickness="0.5" Padding="8" VerticalAlignment="Bottom" Click="continuebtn_Copy1_Click" Custom:ControlsHelper.ContentCharacterCasing="Upper"/>
+        <Button x:Name="continuebtn_Copy1" Style="{DynamicResource SquareButtonStyle}" Content="update" HorizontalAlignment="Left" Margin="10" BorderThickness="0.5" Padding="8" VerticalAlignment="Bottom" Click="continuebtn_Copy1_Click" Custom:ControlsHelper.ContentCharacterCasing="Upper" BorderBrush="{x:Null}"/>
     </Grid>
 </ContentControl>

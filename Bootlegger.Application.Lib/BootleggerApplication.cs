@@ -61,10 +61,10 @@ namespace Bootlegger.App.Lib
                     //containers installed?
                     try
                     {
-                        var exists = await dockerclient.Images.InspectImageAsync("openlab.ncl.ac.uk:4567/bootlegging/server-app:ifrc");
+                        var exists = await dockerclient.Images.InspectImageAsync("bootlegger/server");
                         CurrentState = RUNNING_STATE.READY;
                     }
-                    catch
+                    catch (Exception e)
                     {
                         CurrentState = RUNNING_STATE.NO_IMAGES;
                     }
@@ -191,7 +191,7 @@ namespace Bootlegger.App.Lib
 
             imagestodownload.Add(new ImagesCreateParameters()
             {
-                FromImage = "openlab.ncl.ac.uk:4567/bootlegging/server-app:ifrc"
+                FromImage = "bootlegger/server"
             });
 
             List<Task> tasks = new List<Task>();
@@ -304,16 +304,23 @@ namespace Bootlegger.App.Lib
         //stop containers
         public async Task StopServer()
         {
-            Process dc = new Process();
-            dc.StartInfo = new ProcessStartInfo("docker-compose");
-            dc.StartInfo.Arguments = "-p bootleggerlocal stop";
-            dc.StartInfo.UseShellExecute = false;
-            dc.StartInfo.CreateNoWindow = true;
-            dc.Start();
-            await Task.Run(() =>
+            try
             {
-                dc.WaitForExit();
-            });
+                Process dc = new Process();
+                dc.StartInfo = new ProcessStartInfo("docker-compose");
+                dc.StartInfo.Arguments = "-p bootleggerlocal stop";
+                dc.StartInfo.UseShellExecute = false;
+                dc.StartInfo.CreateNoWindow = true;
+                dc.Start();
+                await Task.Run(() =>
+                {
+                    dc.WaitForExit();
+                });
+            }
+            catch
+            {
+                //cant stop?
+            }
         }
 
         //message, current, total, sub, overall
