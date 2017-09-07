@@ -28,17 +28,17 @@ namespace Bootlegger.App.Win
 
         private async void Running_Loaded(object sender, RoutedEventArgs e)
         {
-            progress.Content = "starting application...";
+            progress.Content = "Starting application...";
             App.BootleggerApp.CreateWiFi("bootlegger","coolshot");
-            ssid.Content = "bootlegger";
-            pwd.Content = "coolshot";
+            ssid.Content = "SSID: bootlegger";
+            pwd.Content = "Password: coolshot";
             if (await App.BootleggerApp.RunServer())
             {
-                progress.Content = "running";
+                progress.Content = "Running";
             }
             else
             {
-                progress.Content = "problem starting application";
+                progress.Content = "Problem starting application!";
             }
         }
 
@@ -50,6 +50,13 @@ namespace Bootlegger.App.Win
         private void continuebtn_Copy_Click(object sender, RoutedEventArgs e)
         {
             App.BootleggerApp.OpenFolder();
+        }
+
+        private async void continuebtn_Copy1_Click(object sender, RoutedEventArgs e)
+        {
+            //update
+            await App.BootleggerApp.StopServer();
+            (Application.Current.MainWindow as MainWindow)._mainFrame.Content = new DownloadImages(true);
         }
     }
 }

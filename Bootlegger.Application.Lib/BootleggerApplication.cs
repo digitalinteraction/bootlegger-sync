@@ -151,7 +151,7 @@ namespace Bootlegger.App.Lib
         List<ImagesCreateParameters> imagestodownload;
         private int CurrentDownload = 0;
 
-        public async Task DownloadImages(CancellationToken cancel)
+        public async Task DownloadImages(bool forceupdate, CancellationToken cancel)
         {
             CurrentDownload = 1;
 
@@ -205,17 +205,15 @@ namespace Bootlegger.App.Lib
                     //detect if it exists:
                     try
                     {
+                        if (forceupdate)
+                            throw new Exception("Must update");
                         var exists = await dockerclient.Images.InspectImageAsync(im.FromImage, cancel);
                         CurrentDownload++;
                         OnNextDownload(CurrentDownload, imagestodownload.Count, CurrentDownload / (double)imagestodownload.Count);
                     }
                     catch
                     {
-                        await dockerclient.Images.CreateImageAsync(im, new AuthConfig()
-                        {
-                            Username = "tom",
-                            Password = "Doobles1986"
-                        }, this, cancel);
+                        await dockerclient.Images.CreateImageAsync(im, null, this, cancel);
                         CurrentDownload++;
                         OnNextDownload(CurrentDownload, imagestodownload.Count, CurrentDownload / (double)imagestodownload.Count);
                     }

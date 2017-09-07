@@ -26,8 +26,17 @@ namespace Bootlegger.App.Win
         public DownloadImages()
         {
             InitializeComponent();
-            App.BootleggerApp.OnDownloadProgress += BootleggerApp_OnDownloadProgress;
-            App.BootleggerApp.OnNextDownload += BootleggerApp_OnNextDownload;
+
+            cancel = new CancellationTokenSource();
+            Loaded += DownloadImages_Loaded;
+        }
+
+        bool force;
+
+        public DownloadImages(bool force)
+        {
+            this.force = force;
+            InitializeComponent();
 
             cancel = new CancellationTokenSource();
             Loaded += DownloadImages_Loaded;
@@ -37,7 +46,7 @@ namespace Bootlegger.App.Win
         {
             Dispatcher.Invoke(() =>
             {
-                if (arg1 > arg2)
+                if (arg1 == arg2)
                 {
                     //do next steps...
                     (Application.Current.MainWindow as MainWindow)._mainFrame.Content = new Running();
@@ -46,7 +55,8 @@ namespace Bootlegger.App.Win
                 {
                     progresses.Clear();
                     layersstack.Children.Clear();
-                    progresslabel.Content = "Downloading " + arg2 + " of " + arg3;
+                    progress.Value = arg3;
+                    progresslabel.Content = "Downloading " + arg1 + " of " + arg2;
                 }
             });
         }
@@ -55,10 +65,13 @@ namespace Bootlegger.App.Win
 
         private async void DownloadImages_Loaded(object sender, RoutedEventArgs e)
         {
+            App.BootleggerApp.OnDownloadProgress += BootleggerApp_OnDownloadProgress;
+            App.BootleggerApp.OnNextDownload += BootleggerApp_OnNextDownload;
+
             progresslabel.Content = "Initiating Download...";
             try
             {
-                await App.BootleggerApp.DownloadImages(cancel.Token);
+                await App.BootleggerApp.DownloadImages(force, cancel.Token);
             }
             catch (TaskCanceledException ex)
             {

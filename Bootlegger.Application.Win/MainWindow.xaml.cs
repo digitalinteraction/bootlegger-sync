@@ -27,6 +27,28 @@ namespace Bootlegger.App.Win
         {
             InitializeComponent();
             Loaded += MainWindow_Initialized;
+            Closing += MainWindow_Closing;
+            MouseDown += Window_MouseDown;
+        }
+
+        private void Window_MouseDown(object sender, MouseButtonEventArgs e)
+        {
+            if (e.ChangedButton == MouseButton.Left)
+                this.DragMove();
+        }
+
+        private async void MainWindow_Closing(object sender, System.ComponentModel.CancelEventArgs e)
+        {
+            if (MessageBox.Show("Closing this application will prevent access to Bootlegger", "Continue?", MessageBoxButton.OKCancel) == MessageBoxResult.OK)
+            {
+                
+                await App.BootleggerApp.StopServer();
+                App.BootleggerApp.StopWifi();
+            }
+            else
+            {
+                e.Cancel = true;
+            }
         }
 
         private async void MainWindow_Initialized(object sender, EventArgs e)
@@ -60,6 +82,7 @@ namespace Bootlegger.App.Win
                     break;
                 case Lib.BootleggerApplication.RUNNING_STATE.READY:
                     //show status (logs, window to open, location of directory of videos)
+                    //_mainFrame.Content = new DownloadImages();
                     _mainFrame.Content = new Running();
                     break;
             }

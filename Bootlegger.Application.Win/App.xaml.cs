@@ -19,16 +19,5 @@ namespace Bootlegger.App.Win
         {
             BootleggerApp = new BootleggerApplication();
         }
-
-        App()
-        {
-            Exit += App_Exit;
-        }
-
-        private async void App_Exit(object sender, ExitEventArgs e)
-        {
-            await BootleggerApp.StopServer();
-            BootleggerApp.StopWifi();
-        }
     }
 }

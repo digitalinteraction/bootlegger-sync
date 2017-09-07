@@ -29,6 +29,16 @@ namespace Bootlegger.App.Win
         private void InstallDocker_Loaded(object sender, RoutedEventArgs e)
         {
             href.Inlines.Add(new Run(App.BootleggerApp.DockerLink));
+            if (App.BootleggerApp.CurrentState == Lib.BootleggerApplication.RUNNING_STATE.NO_DOCKER_RUNNING)
+            {
+                download.Visibility = Visibility.Hidden;
+                start.Visibility = Visibility.Visible;
+            }
+            else
+            {
+                download.Visibility = Visibility.Visible;
+                start.Visibility = Visibility.Hidden;
+            }
         }
 
         private void continuebtn_Copy_Click(object sender, RoutedEventArgs e)

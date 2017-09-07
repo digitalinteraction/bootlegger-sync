@@ -145,6 +145,12 @@
   <ItemGroup>
     <None Include="App.config" />
   </ItemGroup>
+  <ItemGroup>
+    <Resource Include="logo_white.png" />
+  </ItemGroup>
+  <ItemGroup>
+    <Resource Include="ic_wifi_white_48dp_2x.png" />
+  </ItemGroup>
   <Import Project="..\Bootlegger.Application.Lib\Bootlegger.Application.Lib.projitems" Label="Shared" />
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
 </Project>

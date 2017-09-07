@@ -8,9 +8,10 @@
         mc:Ignorable="d"
         BorderThickness="0"
         WindowTitleBrush="Transparent"
-        Title="" Height="350" Width="525" ResizeMode="NoResize" IsMaxRestoreButtonEnabled="False" IsMinButtonEnabled="False">
+        Title="" Height="400" Width="400" ResizeMode="NoResize" IsMaxRestoreButtonEnabled="False" IsMinButtonEnabled="False">
     <Grid>
         <Controls:TransitioningContentControl x:Name="_mainFrame" Transition="LeftReplace" />
         <Controls:ProgressRing x:Name="progress" HorizontalAlignment="Stretch" VerticalAlignment="Center"/>
+        <Path Data="M0,274.08548 L300.05709,274.08548" Height="0.5" Stretch="Fill" Stroke="White" VerticalAlignment="Bottom" Opacity="0.5" Margin="0,0,0,52"/>
     </Grid>
 </Controls:MetroWindow>
