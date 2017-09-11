@@ -1,9 +1,12 @@
 ﻿using Docker.DotNet;
 using Docker.DotNet.Models;
+using Rssdp;
 using System;
 using System.Collections.Generic;
 using System.Diagnostics;
 using System.IO;
+using System.Net;
+using System.Net.Sockets;
 using System.Reflection;
 using System.Text;
 using System.Threading;
@@ -25,8 +28,38 @@ namespace Bootlegger.App.Lib
 
         Docker.DotNet.DockerClient dockerclient;
 
+        private SsdpDevicePublisher _Publisher;
+
+        public static string GetLocalIPAddress()
+        {
+            var host = Dns.GetHostEntry(Dns.GetHostName());
+            foreach (var ip in host.AddressList)
+            {
+                if (ip.AddressFamily == AddressFamily.InterNetwork)
+                {
+                    return ip.ToString();
+                }
+            }
+            throw new Exception("Local IP Address Not Found!");
+        }
+
         public async Task Start()
         {
+            _Publisher = new SsdpDevicePublisher();
+            var deviceDefinition = new SsdpRootDevice()
+            {
+                CacheLifetime = TimeSpan.FromMinutes(30), //How long SSDP clients can cache this info.
+                Location = new Uri("http://"+ Dns.GetHostName()), // Must point to the URL that serves your devices UPnP description document. 
+                DeviceTypeNamespace = "bootlegger",
+                DeviceType = "server",
+                DeviceVersion = 1,
+                FriendlyName = "Bootlegger Server",
+                Manufacturer = "Newcastle University",
+                ModelName = "Serverv1",
+                Uuid = Guid.NewGuid().ToString() // This must be a globally unique value that survives reboots etc. Get from storage or embedded hardware etc.
+            };
+            _Publisher.AddDevice(deviceDefinition);
+
             if (CurrentPlatform.Platform == PlatformID.Win32Windows || CurrentPlatform.Platform == PlatformID.Unix)
             {
                 CurrentState = RUNNING_STATE.NOT_SUPORTED;
