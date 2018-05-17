@@ -1,4 +1,5 @@
-﻿using System;
+﻿using Bootlegger.App.Lib;
+using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
@@ -28,10 +29,12 @@ namespace Bootlegger.App.Win
 
         private async void Running_Loaded(object sender, RoutedEventArgs e)
         {
+            App.BootleggerApp.OnLog += BootleggerApp_OnLog;
             progress.Content = "Starting application...";
-            App.BootleggerApp.CreateWiFi("bootlegger","coolshot");
-            ssid.Content = "SSID: bootlegger";
-            pwd.Content = "Password: coolshot";
+            //App.BootleggerApp.CreateWiFi("bootlegger","coolshot");
+            ssid.Content = $"http://{BootleggerApplication.GetLocalIPAddress()}";
+            //ssid.Content = "SSID: bootlegger";
+            pwd.Content = "";
             if (await App.BootleggerApp.RunServer())
             {
                 progress.Content = "Running";
@@ -40,6 +43,17 @@ namespace Bootlegger.App.Win
             {
                 progress.Content = "Problem starting application!";
             }
+
+           
+        }
+
+        private void BootleggerApp_OnLog(string obj)
+        {
+            Dispatcher.BeginInvoke(new Action(() =>
+            {
+                log.AppendText(obj);
+                log.ScrollToEnd();
+            }));
         }
 
         private void continuebtn_Click(object sender, RoutedEventArgs e)

@@ -193,7 +193,8 @@ namespace Bootlegger.App.Lib
             //download images needed
             imagestodownload.Add(new ImagesCreateParameters()
             {
-                FromImage = "mongo"
+                FromImage = "mvertes/alpine-mongo",
+                Tag = "latest"
             });
 
             imagestodownload.Add(new ImagesCreateParameters()
@@ -204,27 +205,36 @@ namespace Bootlegger.App.Lib
 
             imagestodownload.Add(new ImagesCreateParameters()
             {
-                FromImage = "jwilder/docker-gen"
+                FromImage = "jwilder/docker-gen",
+                Tag = "latest"
             });
 
             imagestodownload.Add(new ImagesCreateParameters()
             {
-                FromImage = "schickling/beanstalkd"
+                FromImage = "kusmierz/beanstalkd",
+                Tag = "latest"
             });
 
             imagestodownload.Add(new ImagesCreateParameters()
             {
-                FromImage = "nginx"
+                FromImage = "bootlegger/transcode-server",
+                Tag = "latest"
             });
 
             imagestodownload.Add(new ImagesCreateParameters()
             {
-                FromImage = "jwilder/docker-gen"
+                FromImage = "nginx:alpine"
             });
+
+            //imagestodownload.Add(new ImagesCreateParameters()
+            //{
+            //    FromImage = "jwilder/docker-gen"
+            //});
 
             imagestodownload.Add(new ImagesCreateParameters()
             {
-                FromImage = "bootlegger/server"
+                FromImage = "bootlegger/server",
+                Tag = "latest"
             });
 
             List<Task> tasks = new List<Task>();
@@ -283,35 +293,37 @@ namespace Bootlegger.App.Lib
             }
         }
 
-        public void CreateWiFi(string ssid, string pwd)
-        {
-            if (CurrentPlatform.Platform == PlatformID.Win32NT)
-            {
-                Process.Start(new ProcessStartInfo()
-                {
-                    FileName = "netsh",
-                    Arguments = "wlan set hostednetwork mode = allow ssid = "+ssid+" key = "+pwd,
-                    UseShellExecute = false,
-                    CreateNoWindow = true
-                }    
-                );
-                //netsh wlan set hostednetwork mode = allow ssid = Hotspot key = 7Tutorials
-                Process.Start(new ProcessStartInfo()
-                {
-                    FileName = "netsh",
-                    Arguments = "wlan start hostednetwork",
-                    UseShellExecute = false,
-                    CreateNoWindow = true
-                }
-                );
-                //netsh wlan start hostednetwork
-            }
-        }
+        //public void CreateWiFi(string ssid, string pwd)
+        //{
+        //    if (CurrentPlatform.Platform == PlatformID.Win32NT)
+        //    {
+        //        Process.Start(new ProcessStartInfo()
+        //        {
+        //            FileName = "netsh",
+        //            Arguments = "wlan set hostednetwork mode = allow ssid = "+ssid+" key = "+pwd,
+        //            UseShellExecute = false,
+        //            CreateNoWindow = true
+        //        }    
+        //        );
+        //        //netsh wlan set hostednetwork mode = allow ssid = Hotspot key = 7Tutorials
+        //        Process.Start(new ProcessStartInfo()
+        //        {
+        //            FileName = "netsh",
+        //            Arguments = "wlan start hostednetwork",
+        //            UseShellExecute = false,
+        //            CreateNoWindow = true
+        //        }
+        //        );
+        //        //netsh wlan start hostednetwork
+        //    }
+        //}
 
-        public void StopWifi()
-        {
-            //netsh wlan stop hostednetwork
-        }
+        //public void StopWifi()
+        //{
+        //    //netsh wlan stop hostednetwork
+        //}
+
+        public event Action<string> OnLog;
 
         //start containers...
         public async Task<bool> RunServer()
@@ -319,17 +331,52 @@ namespace Bootlegger.App.Lib
             //if not running:
             Process dc = new Process();
             dc.StartInfo = new ProcessStartInfo("docker-compose");
+            dc.StartInfo.WorkingDirectory = Directory.GetCurrentDirectory();
             dc.StartInfo.Arguments = "-p bootleggerlocal up -d";
-
+            dc.StartInfo.Environment.Add("MYIP", GetLocalIPAddress());
             dc.StartInfo.UseShellExecute = false;
             dc.StartInfo.CreateNoWindow = true;
+            dc.StartInfo.RedirectStandardOutput = true;
+            dc.StartInfo.RedirectStandardError = true;
 
             dc.Start();
+            dc.BeginOutputReadLine();
+            dc.BeginErrorReadLine();
+
+            dc.OutputDataReceived += (s, o) =>
+            {
+                OnLog?.Invoke(o.Data);
+            };
+
+            dc.ErrorDataReceived += (s, o) =>
+            {
+                OnLog?.Invoke(o.Data);
+            };
 
             await Task.Run(() =>
             {
                 dc.WaitForExit();
             });
+
+            WebClient client = new WebClient();
+    
+            bool connected = false;
+            int count = 0;
+            while (!connected && count < 10)
+            {
+                try
+                {
+                    var result = await client.DownloadStringTaskAsync($"http://{GetLocalIPAddress()}/status");
+                    connected = true;
+                }
+                catch {
+                    await Task.Delay(5000);
+                }
+                finally
+                {
+                    count++;
+                }
+            }
 
             return dc.ExitCode == 0;
         }
@@ -364,11 +411,15 @@ namespace Bootlegger.App.Lib
 
         public void Report(JSONMessage value)
         {
-            //Debug.WriteLine(value);
+            //Debug.WriteLine(value.From);
+
+            //Debug.WriteLine(value.Status);
+            //Debug.WriteLine(value.ProgressMessage);
             if (value.ProgressMessage != null)
             {
                 //Debug.WriteLine(value.ProgressMessage);
                 Layers[value.ID] = value.Progress.Current / (double)value.Progress.Total;
+                //Console.WriteLine(CurrentDownload);
                 OnDownloadProgress?.Invoke(value.Status, CurrentDownload, imagestodownload.Count, Layers, CurrentDownload / (double)imagestodownload.Count);
             }
         }

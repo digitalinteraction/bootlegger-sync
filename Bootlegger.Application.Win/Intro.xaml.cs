@@ -23,6 +23,7 @@ namespace Bootlegger.App.Win
         public Intro()
         {
             InitializeComponent();
+
             continuebtn.Click += Continuebtn_Click;
         }
 

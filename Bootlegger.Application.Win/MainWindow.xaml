@@ -9,7 +9,7 @@
         BorderThickness="0"
         WindowStartupLocation="CenterScreen"
         WindowTitleBrush="Transparent"
-        Title="" Height="400" Width="400" ResizeMode="CanMinimize" IsMaxRestoreButtonEnabled="False">
+        Title="" Height="400" Width="800" ResizeMode="CanMinimize" IsMaxRestoreButtonEnabled="False">
     <Grid>
         <Controls:TransitioningContentControl x:Name="_mainFrame" Transition="LeftReplace" />
         <Controls:ProgressRing x:Name="progress" HorizontalAlignment="Stretch" VerticalAlignment="Center"/>

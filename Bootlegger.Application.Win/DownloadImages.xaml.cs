@@ -93,13 +93,21 @@ namespace Bootlegger.App.Win
 
         private Dictionary<string, ProgressBar> progresses = new Dictionary<string, ProgressBar>();
 
+        int lastimage = -1;
+
         private void BootleggerApp_OnDownloadProgress(string arg1, int arg2, int arg3, Dictionary<string,double> layers, double arg5)
         {
             Dispatcher.Invoke(() =>
             {
                 progress.Value = arg5;
                 //Debug.WriteLine(arg5);
-                
+
+                if (lastimage != arg2)
+                {
+                    progresses.Clear();
+                    layersstack.Children.Clear();
+                }
+
                 foreach(var layer in layers)
                 {
                     if (progresses.ContainsKey(layer.Key))

@@ -1,59 +1,73 @@
-﻿version: '2'
+version: "2"
+
 volumes:
   mongo-data:
     external: false
   redis-data:
     external: false
-  upload-data:
-    external: false
 
 services:
   nginx:
-    image: nginx
-    container_name: nginx
+    image: nginx:alpine
     restart: always
     ports:
       - "80:80"
     volumes:
-      - "./conf:/etc/nginx/conf.d"
+      - "./server.conf:/etc/nginx/conf.d/default.conf"
       - "./bootlegger.conf:/etc/nginx/vhost.d/default"
       - "/usr/share/nginx/html"
-      - "./certs:/etc/nginx/certs:ro"
     volumes_from:
       - web
-
-  nginx-gen:
-    image: jwilder/docker-gen
-    restart: always
-    volumes:
-      - "/var/run/docker.sock:/tmp/docker.sock:ro"
-      - "./nginx.tmpl:/etc/docker-gen/templates/nginx.tmpl:ro"
-    volumes_from:
-      - nginx
-    command: '-notify-sighup nginx -watch -wait 5s:30s /etc/docker-gen/templates/nginx.tmpl /etc/nginx/conf.d/default.conf'
 
   redis:
     image: redis:alpine
     command: redis-server --appendonly yes
+    volumes:
+      - redis-data:/data
 
   mongo:
-    image: mongo
+    image: mvertes/alpine-mongo
+    volumes:
+      - mongo-data:/data/db
 
   beanstalk:
-    image: schickling/beanstalkd
+    image: kusmierz/beanstalkd
+
+  vault:
+    image: openlab.ncl.ac.uk:4567/bootlegging/server-app:latest
+    restart: always
+    ports:
+      - "3000:3000"
+    volumes:
+      - "./upload:/usr/src/app/upload"   
+    command: nodemon vault/index.js
+
+  worker:
+    image: bootlegger/transcode-server:latest
+    restart: always
+    volumes_from:
+      - web
+    environment:
+      - MYIP=${MYIP}
+    volumes:
+      - "./worker.js:/usr/src/app/config/local.js"
+      - "./upload:/usr/src/app/upload"
+      - "/.tmp/"
 
   web:
     restart: always
-    image: openlab.ncl.ac.uk:4567/bootlegging/server-app:ifrc
-    #build: ../..
+    image: openlab.ncl.ac.uk:4567/bootlegging/server-app:latest
     depends_on: 
       - redis
       - mongo
       - beanstalk
+    expose:
+      - 1337
     volumes:
-      - ./ssl:/usr/src/app/ssl:ro
-      - ./local.js:/usr/src/app/config/local.js:ro
-      - ./media:/usr/src/app/uploads
+      - ./local.js:/usr/src/app/config/local.js
+      - "./upload:/usr/src/app/upload"
     environment:
+      - MYIP=${MYIP}
       - VIRTUAL_HOST=localhost
+      - VIRTUAL_PORT=1337
       - NODE_ENV=production

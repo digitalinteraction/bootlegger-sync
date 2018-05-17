@@ -57,7 +57,7 @@ namespace Bootlegger.App.Win
             else
             {
                 await App.BootleggerApp.StopServer();
-                App.BootleggerApp.StopWifi();
+                //App.BootleggerApp.StopWifi();
             }
         }
 
