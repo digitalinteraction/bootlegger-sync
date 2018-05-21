@@ -34,7 +34,7 @@ services:
     image: kusmierz/beanstalkd
 
   vault:
-    image: openlab.ncl.ac.uk:4567/bootlegging/server-app:latest
+    image: bootlegger/server-app:latest
     restart: always
     ports:
       - "3000:3000"
@@ -56,7 +56,7 @@ services:
 
   web:
     restart: always
-    image: openlab.ncl.ac.uk:4567/bootlegging/server-app:latest
+    image: bootlegger/server-app:latest
     depends_on: 
       - redis
       - mongo

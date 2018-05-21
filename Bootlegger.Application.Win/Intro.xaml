@@ -6,7 +6,7 @@
       xmlns:local="clr-namespace:Bootlegger.App.Win"
       xmlns:Custom="http://metro.mahapps.com/winfx/xaml/controls" x:Class="Bootlegger.App.Win.Intro"
       mc:Ignorable="d" 
-      d:DesignHeight="400" d:DesignWidth="400">
+      d:DesignHeight="400" d:DesignWidth="800">
 
     <Grid>
         <Grid VerticalAlignment="Bottom">
@@ -14,8 +14,8 @@
         </Grid>
         <StackPanel Margin="20" Orientation="Vertical">
             <Label Padding="0" Content="Welcome to Bootlegger" Height="60" VerticalAlignment="Top" FontFamily="Segoe UI Light" FontSize="36"/>
-            <TextBlock HorizontalAlignment="Left" TextWrapping="Wrap" VerticalAlignment="Top" Foreground="#FFA4A4A4" FontFamily="Segoe UI Light" Height="84" Width="360" FontSize="18"><Run Text="Running Bootlegger locally requires "/><Run Text="additional"/><Run Text=" software to be downloaded. "/><Run Text="Make "/><Run Text="sure you are connected to WiFi before continuing..."/><Run Text="  "/></TextBlock>
-            <Image Source="logo_white.png" Margin="50,50,50,0"/>
+            <TextBlock HorizontalAlignment="Left" TextWrapping="Wrap" VerticalAlignment="Top" Foreground="#FFA4A4A4" FontFamily="Segoe UI Light" Height="84" Width="760" FontSize="18"><Run Text="Running Bootlegger locally requires "/><Run Text="additional"/><Run Text=" software to be downloaded. "/><Run Text="Make "/><Run Text="sure you are connected to WiFi before continuing..."/><Run Text="  "/></TextBlock>
+            <Image Source="logo_white.png" HorizontalAlignment="Center" Height="91"/>
 
         </StackPanel>
 

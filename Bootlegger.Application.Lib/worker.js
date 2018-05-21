@@ -15,5 +15,6 @@
     master_url_port: '1337',
     CURRENT_EDIT_KEY: '8ee208fa-a20d-4cf5-9a12-6803c8a4852f',
     MIN_CLIP_COUNT: 1,
-    MAX_CACHE: 10 * 1024 * 1024 * 1024
+    MAX_CACHE: 10 * 1024 * 1024 * 1024,
+    MUSIC_LOCATION: '/usr/src/app/www/music/looped/'
 }

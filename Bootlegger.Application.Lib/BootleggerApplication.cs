@@ -32,15 +32,19 @@ namespace Bootlegger.App.Lib
 
         public static string GetLocalIPAddress()
         {
-            var host = Dns.GetHostEntry(Dns.GetHostName());
-            foreach (var ip in host.AddressList)
-            {
-                if (ip.AddressFamily == AddressFamily.InterNetwork)
-                {
-                    return ip.ToString();
-                }
-            }
-            throw new Exception("Local IP Address Not Found!");
+            //return Dns.GetHostName();
+
+            return "10.10.10.1";
+
+            //var host = Dns.GetHostEntry(Dns.GetHostName());
+            //foreach (var ip in host.AddressList)
+            //{
+            //    if (ip.AddressFamily == AddressFamily.InterNetwork)
+            //    {
+            //        return ip.ToString();
+            //    }
+            //}
+            //throw new Exception("Local IP Address Not Found!");
         }
 
         public async Task Start()
@@ -49,15 +53,16 @@ namespace Bootlegger.App.Lib
             var deviceDefinition = new SsdpRootDevice()
             {
                 CacheLifetime = TimeSpan.FromMinutes(30), //How long SSDP clients can cache this info.
-                Location = new Uri("http://"+ Dns.GetHostName()), // Must point to the URL that serves your devices UPnP description document. 
+                Location = new Uri("http://"+ GetLocalIPAddress()), // Must point to the URL that serves your devices UPnP description document. 
                 DeviceTypeNamespace = "bootlegger",
                 DeviceType = "server",
                 DeviceVersion = 1,
                 FriendlyName = "Bootlegger Server",
                 Manufacturer = "Newcastle University",
                 ModelName = "Serverv1",
-                Uuid = Guid.NewGuid().ToString() // This must be a globally unique value that survives reboots etc. Get from storage or embedded hardware etc.
+                Uuid = "30f4d4fe-59e6-11e8-9c2d-fa7ae01bbebc" // This must be a globally unique value that survives reboots etc. Get from storage or embedded hardware etc.
             };
+            _Publisher.NotificationBroadcastInterval = TimeSpan.FromSeconds(10);
             _Publisher.AddDevice(deviceDefinition);
 
             if (CurrentPlatform.Platform == PlatformID.Win32Windows || CurrentPlatform.Platform == PlatformID.Unix)
@@ -65,6 +70,11 @@ namespace Bootlegger.App.Lib
                 CurrentState = RUNNING_STATE.NOT_SUPORTED;
                 return;
             }
+
+            /////FOR DEBUG
+            //CurrentState = RUNNING_STATE.RUNNING;
+            //return;
+
 
             try
             { 
@@ -157,7 +167,7 @@ namespace Bootlegger.App.Lib
 
         internal void OpenFolder()
         {
-            System.Diagnostics.Process.Start(Directory.GetCurrentDirectory() + Path.DirectorySeparatorChar + "media");
+            System.Diagnostics.Process.Start(Directory.GetCurrentDirectory() + Path.DirectorySeparatorChar + "upload");
         }
 
         public string DockerLink
