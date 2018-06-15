@@ -1,4 +1,6 @@
-﻿<ContentControl x:Class="Bootlegger.App.Win.DownloadImages"
+﻿<ContentControl 
+    Width="400"
+    x:Class="Bootlegger.App.Win.DownloadImages"
       xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
       xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
                 xmlns:Controls="clr-namespace:MahApps.Metro.Controls;assembly=MahApps.Metro"

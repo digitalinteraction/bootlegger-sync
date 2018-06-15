@@ -63,6 +63,12 @@
         }
         "Entry"
         {
+        "MsmKey" = "8:_116DF89548A141FEA830CA697636D1E5"
+        "OwnerKey" = "8:_UNDEFINED"
+        "MsmSig" = "8:_UNDEFINED"
+        }
+        "Entry"
+        {
         "MsmKey" = "8:_1EDB30786029BC63B602B89EB967A0DE"
         "OwnerKey" = "8:_65E10826A838486CB805AE80584177EE"
         "MsmSig" = "8:_UNDEFINED"
@@ -1151,6 +1157,26 @@
             "Register" = "3:1"
             "Exclude" = "11:FALSE"
             "IsDependency" = "11:TRUE"
+            "IsolateTo" = "8:"
+            }
+            "{1FB2D0AE-D3B9-43D4-B9DD-F88EC61E35DE}:_116DF89548A141FEA830CA697636D1E5"
+            {
+            "SourcePath" = "8:C:\\Users\\Tom Bartindale\\Downloads\\web_hi_res_512_RLk_icon.ico"
+            "TargetName" = "8:web_hi_res_512_RLk_icon.ico"
+            "Tag" = "8:"
+            "Folder" = "8:_B214B1B3EBA84645BABEF370A996E37D"
+            "Condition" = "8:"
+            "Transitive" = "11:FALSE"
+            "Vital" = "11:TRUE"
+            "ReadOnly" = "11:FALSE"
+            "Hidden" = "11:FALSE"
+            "System" = "11:FALSE"
+            "Permanent" = "11:FALSE"
+            "SharedLegacy" = "11:FALSE"
+            "PackageAs" = "3:1"
+            "Register" = "3:1"
+            "Exclude" = "11:FALSE"
+            "IsDependency" = "11:FALSE"
             "IsolateTo" = "8:"
             }
             "{9F6F8455-1EF1-4B85-886A-4223BCC8E7F7}:_1EDB30786029BC63B602B89EB967A0DE"
@@ -3064,7 +3090,7 @@
         "Name" = "8:Microsoft Visual Studio"
         "ProductName" = "8:Our Story Standalone"
         "ProductCode" = "8:{34A7C04E-CB8F-445F-BA64-2B79185309C4}"
-        "PackageCode" = "8:{230ECCF2-BD0D-431E-9889-857EC25F8CA0}"
+        "PackageCode" = "8:{C0624788-7D28-4138-96A4-AD34B043729F}"
         "UpgradeCode" = "8:{7016BCA9-4D43-4C42-80A9-04D1C6DA2405}"
         "AspNetVersion" = "8:4.0.30319.0"
         "RestartWWWService" = "11:FALSE"
@@ -3599,7 +3625,7 @@
         {
             "{5259A561-127C-4D43-A0A1-72F10C7B3BF8}:_65E10826A838486CB805AE80584177EE"
             {
-            "SourcePath" = "8:..\\Bootlegger.Application.Win\\obj\\Debug\\Bootlegger.exe"
+            "SourcePath" = "8:..\\Bootlegger.Application.Win\\obj\\Debug\\Our Story Standalone.exe"
             "TargetName" = "8:"
             "Tag" = "8:"
             "Folder" = "8:_B214B1B3EBA84645BABEF370A996E37D"

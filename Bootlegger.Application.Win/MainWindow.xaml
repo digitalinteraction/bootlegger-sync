@@ -9,7 +9,13 @@
         BorderThickness="0"
         WindowStartupLocation="CenterScreen"
         WindowTitleBrush="Transparent"
-        Title="" Height="400" Width="800" ResizeMode="CanMinimize" IsMaxRestoreButtonEnabled="False">
+        Title="Our Story Standalone" Height="400" Width="800" ResizeMode="CanMinimize" IsMaxRestoreButtonEnabled="False">
+    <Controls:MetroWindow.RightWindowCommands>
+        <Controls:WindowCommands>
+            <Button Content="Documentation" Click="Button_Click" />
+        </Controls:WindowCommands>
+    </Controls:MetroWindow.RightWindowCommands>
+
     <Grid>
         <Controls:TransitioningContentControl x:Name="_mainFrame" Transition="LeftReplace" />
         <Controls:ProgressRing x:Name="progress" HorizontalAlignment="Stretch" VerticalAlignment="Center"/>

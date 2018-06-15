@@ -102,5 +102,11 @@ namespace Bootlegger.App.Win
 
             
         }
+
+        private void Button_Click(object sender, RoutedEventArgs e)
+        {
+            //open help:
+            App.BootleggerApp.OpenDocs();
+        }
     }
 }

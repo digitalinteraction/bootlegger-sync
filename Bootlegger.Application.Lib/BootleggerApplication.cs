@@ -192,6 +192,11 @@ namespace Bootlegger.App.Lib
             System.Diagnostics.Process.Start("http://localhost");
         }
 
+        public void OpenDocs()
+        {
+            System.Diagnostics.Process.Start("https://our-story.gitbook.io/standalone");
+        }
+
         List<ImagesCreateParameters> imagestodownload;
         private int CurrentDownload = 0;
 
@@ -303,36 +308,6 @@ namespace Bootlegger.App.Lib
                 return await dockerclient.Volumes.CreateAsync(param);
             }
         }
-
-        //public void CreateWiFi(string ssid, string pwd)
-        //{
-        //    if (CurrentPlatform.Platform == PlatformID.Win32NT)
-        //    {
-        //        Process.Start(new ProcessStartInfo()
-        //        {
-        //            FileName = "netsh",
-        //            Arguments = "wlan set hostednetwork mode = allow ssid = "+ssid+" key = "+pwd,
-        //            UseShellExecute = false,
-        //            CreateNoWindow = true
-        //        }    
-        //        );
-        //        //netsh wlan set hostednetwork mode = allow ssid = Hotspot key = 7Tutorials
-        //        Process.Start(new ProcessStartInfo()
-        //        {
-        //            FileName = "netsh",
-        //            Arguments = "wlan start hostednetwork",
-        //            UseShellExecute = false,
-        //            CreateNoWindow = true
-        //        }
-        //        );
-        //        //netsh wlan start hostednetwork
-        //    }
-        //}
-
-        //public void StopWifi()
-        //{
-        //    //netsh wlan stop hostednetwork
-        //}
 
         public event Action<string> OnLog;
 

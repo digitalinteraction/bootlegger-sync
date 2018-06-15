@@ -51,7 +51,7 @@ namespace Bootlegger.App.Win
         {
             Dispatcher.BeginInvoke(new Action(() =>
             {
-                log.AppendText(obj);
+                log.AppendText(obj?.Trim('\n','\r')+"\r");
                 log.ScrollToEnd();
             }));
         }
