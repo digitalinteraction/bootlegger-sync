@@ -12,7 +12,9 @@
     <Compile Include="$(MSBuildThisFileDirectory)BootleggerApplication.cs" />
   </ItemGroup>
   <ItemGroup>
-    <None Include="$(MSBuildThisFileDirectory)config.js" />
+    <None Include="$(MSBuildThisFileDirectory)config.js">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </None>
     <None Include="$(MSBuildThisFileDirectory)docker-compose.yml">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </None>
