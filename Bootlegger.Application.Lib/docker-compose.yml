@@ -49,7 +49,7 @@ services:
     volumes_from:
       - web
     environment:
-      - MYIP=${MYIP}
+      - MYIP=10.10.10.1
     volumes:
       - "./worker.js:/usr/src/app/config/local.js:ro"
       - "./upload:/usr/src/app/upload"
