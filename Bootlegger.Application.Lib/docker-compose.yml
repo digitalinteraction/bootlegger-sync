@@ -68,6 +68,6 @@ services:
       - "./local.js:/usr/src/app/config/local.js:ro"
       - "./upload:/usr/src/app/upload"
     environment:
-      - MYIP=${MYIP}
+      - MYIP=10.10.10.1
       - VIRTUAL_HOST=localhost
       - VIRTUAL_PORT=1337
