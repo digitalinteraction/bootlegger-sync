@@ -64,6 +64,7 @@ namespace Bootlegger.App.Lib
             };
             _Publisher.NotificationBroadcastInterval = TimeSpan.FromSeconds(10);
             _Publisher.AddDevice(deviceDefinition);
+            _Publisher.StandardsMode = SsdpStandardsMode.Relaxed;
 
             if (CurrentPlatform.Platform == PlatformID.Win32Windows || CurrentPlatform.Platform == PlatformID.Unix)
             {
@@ -243,7 +244,7 @@ namespace Bootlegger.App.Lib
 
             imagestodownload.Add(new ImagesCreateParameters()
             {
-                FromImage = "bootlegger/server",
+                FromImage = "bootlegger/server-app",
                 Tag = "latest"
             });
 

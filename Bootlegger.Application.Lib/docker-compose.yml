@@ -71,4 +71,3 @@ services:
       - MYIP=${MYIP}
       - VIRTUAL_HOST=localhost
       - VIRTUAL_PORT=1337
-      - NODE_ENV=production
