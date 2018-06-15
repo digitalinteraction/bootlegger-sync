@@ -1691,7 +1691,7 @@
             "SharedLegacy" = "11:FALSE"
             "PackageAs" = "3:1"
             "Register" = "3:1"
-            "Exclude" = "11:FALSE"
+            "Exclude" = "11:TRUE"
             "IsDependency" = "11:TRUE"
             "IsolateTo" = "8:"
             }
@@ -1722,7 +1722,7 @@
             "SharedLegacy" = "11:FALSE"
             "PackageAs" = "3:1"
             "Register" = "3:1"
-            "Exclude" = "11:FALSE"
+            "Exclude" = "11:TRUE"
             "IsDependency" = "11:TRUE"
             "IsolateTo" = "8:"
             }
@@ -1784,7 +1784,7 @@
             "SharedLegacy" = "11:FALSE"
             "PackageAs" = "3:1"
             "Register" = "3:1"
-            "Exclude" = "11:FALSE"
+            "Exclude" = "11:TRUE"
             "IsDependency" = "11:TRUE"
             "IsolateTo" = "8:"
             }
@@ -2176,7 +2176,7 @@
             "SharedLegacy" = "11:FALSE"
             "PackageAs" = "3:1"
             "Register" = "3:1"
-            "Exclude" = "11:FALSE"
+            "Exclude" = "11:TRUE"
             "IsDependency" = "11:TRUE"
             "IsolateTo" = "8:"
             }
@@ -3090,7 +3090,7 @@
         "Name" = "8:Microsoft Visual Studio"
         "ProductName" = "8:Our Story Standalone"
         "ProductCode" = "8:{34A7C04E-CB8F-445F-BA64-2B79185309C4}"
-        "PackageCode" = "8:{C0624788-7D28-4138-96A4-AD34B043729F}"
+        "PackageCode" = "8:{2FDF0EF2-79F2-461B-AF06-A772E9E0A102}"
         "UpgradeCode" = "8:{7016BCA9-4D43-4C42-80A9-04D1C6DA2405}"
         "AspNetVersion" = "8:4.0.30319.0"
         "RestartWWWService" = "11:FALSE"
@@ -3107,7 +3107,7 @@
         "Keywords" = "8:"
         "ARPCOMMENTS" = "8:"
         "ARPURLINFOABOUT" = "8:"
-        "ARPPRODUCTICON" = "8:"
+        "ARPPRODUCTICON" = "8:_116DF89548A141FEA830CA697636D1E5"
         "ARPIconIndex" = "3:0"
         "SearchPath" = "8:"
         "UseSystemSearchPath" = "11:TRUE"
@@ -3221,7 +3221,7 @@
             "Target" = "8:_65E10826A838486CB805AE80584177EE"
             "Folder" = "8:_A45BFC42CC084ABA9F1BAFFAFDF0D264"
             "WorkingFolder" = "8:_B214B1B3EBA84645BABEF370A996E37D"
-            "Icon" = "8:"
+            "Icon" = "8:_116DF89548A141FEA830CA697636D1E5"
             "Feature" = "8:"
             }
         }
@@ -3625,7 +3625,7 @@
         {
             "{5259A561-127C-4D43-A0A1-72F10C7B3BF8}:_65E10826A838486CB805AE80584177EE"
             {
-            "SourcePath" = "8:..\\Bootlegger.Application.Win\\obj\\Debug\\Our Story Standalone.exe"
+            "SourcePath" = "8:..\\Bootlegger.Application.Win\\obj\\Release\\Our Story Standalone.exe"
             "TargetName" = "8:"
             "Tag" = "8:"
             "Folder" = "8:_B214B1B3EBA84645BABEF370A996E37D"

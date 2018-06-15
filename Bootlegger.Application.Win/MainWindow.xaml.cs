@@ -45,7 +45,7 @@ namespace Bootlegger.App.Win
             if (!canexit)
             {
                 e.Cancel = true;
-                var tt = await (App.Current.MainWindow as MetroWindow).ShowMessageAsync("Continue?", "Closing this application will prevent access to Bootlegger", MessageDialogStyle.AffirmativeAndNegative);
+                var tt = await (App.Current.MainWindow as MetroWindow).ShowMessageAsync("Continue?", "Closing this application will prevent access to Our Story", MessageDialogStyle.AffirmativeAndNegative);
                 if (tt == MessageDialogResult.Affirmative)
                 {
                     canexit = true;
