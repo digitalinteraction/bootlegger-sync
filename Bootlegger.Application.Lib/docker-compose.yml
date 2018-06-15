@@ -65,7 +65,7 @@ services:
     expose:
       - 1337
     volumes:
-      - "./local.js:/usr/src/app/config/local.js:ro"
+      - "./config.js:/usr/src/app/config/local.js:ro"
       - "./upload:/usr/src/app/upload"
     environment:
       - MYIP=10.10.10.1
