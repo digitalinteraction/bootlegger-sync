@@ -18,7 +18,7 @@
                 <TextBlock TextWrapping="Wrap" VerticalAlignment="Top" Foreground="White" FontSize="18"><Run Text="Click the link "/><Run Text="to download and install Docker"/></TextBlock>
                 <TextBlock TextWrapping="Wrap" VerticalAlignment="Top" Foreground="White" FontSize="18"><Hyperlink x:Name="href" Click="href_Click"/></TextBlock>
             </StackPanel>
-            <TextBlock TextWrapping="Wrap" x:Name="start" VerticalAlignment="Top" Foreground="White" Visibility="Hidden" FontSize="18">Docker is installed, please check Docker it is running</TextBlock>
+            <TextBlock TextWrapping="Wrap" x:Name="start" VerticalAlignment="Top" Foreground="White" Visibility="Hidden" FontSize="18">Docker for Windows is installed, please check it is running</TextBlock>
         </StackPanel>
         <Grid VerticalAlignment="Bottom">
             <Button x:Name="continuebtn" Style="{DynamicResource SquareButtonStyle}" Content="check Docker is running" HorizontalAlignment="Right" Margin="10" VerticalAlignment="Bottom" Click="continuebtn_Click" Custom:ControlsHelper.ContentCharacterCasing="Upper" BorderThickness="0.5" Padding="8"/>

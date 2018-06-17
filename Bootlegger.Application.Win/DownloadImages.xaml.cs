@@ -24,6 +24,9 @@ namespace Bootlegger.App.Win
     /// </summary>
     public partial class DownloadImages
     {
+        bool doneOnce = false;
+
+
         public DownloadImages()
         {
             InitializeComponent();
@@ -66,28 +69,31 @@ namespace Bootlegger.App.Win
 
         private async void DownloadImages_Loaded(object sender, RoutedEventArgs e)
         {
-            App.BootleggerApp.OnDownloadProgress += BootleggerApp_OnDownloadProgress;
-            App.BootleggerApp.OnNextDownload += BootleggerApp_OnNextDownload;
-
-
-            progresslabel.Content = "Stopping Applicaton...";
-
-            await App.BootleggerApp.StopServer();
-
-            progresslabel.Content = "Initiating Download...";
-
-
-            try
+            if (!doneOnce)
             {
-                await App.BootleggerApp.DownloadImages(force, cancel.Token);
-            }
-            catch (TaskCanceledException ex)
-            {
- 
-            }
-            catch (Exception ef)
-            {
-                await (App.Current.MainWindow as MetroWindow).ShowMessageAsync("Error",ef.Message);
+                doneOnce = true;
+                App.BootleggerApp.OnDownloadProgress += BootleggerApp_OnDownloadProgress;
+                App.BootleggerApp.OnNextDownload += BootleggerApp_OnNextDownload;
+
+                progresslabel.Content = "Stopping Applicaton...";
+
+                await App.BootleggerApp.StopServer();
+
+                progresslabel.Content = "Initiating Download...";
+
+
+                try
+                {
+                    await App.BootleggerApp.DownloadImages(force, cancel.Token);
+                }
+                catch (TaskCanceledException ex)
+                {
+
+                }
+                catch (Exception ef)
+                {
+                    await (App.Current.MainWindow as MetroWindow).ShowMessageAsync("Error", ef.Message);
+                }
             }
         }
 

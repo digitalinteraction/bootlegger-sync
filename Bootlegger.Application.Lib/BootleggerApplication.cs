@@ -11,6 +11,7 @@ using System.Reflection;
 using System.Text;
 using System.Threading;
 using System.Threading.Tasks;
+using YamlDotNet.RepresentationModel;
 
 namespace Bootlegger.App.Lib
 {
@@ -105,7 +106,7 @@ namespace Bootlegger.App.Lib
                     //containers installed?
                     try
                     {
-                        var exists = await dockerclient.Images.InspectImageAsync("bootlegger/server");
+                        var exists = await dockerclient.Images.InspectImageAsync("bootlegger/server-app");
                         CurrentState = RUNNING_STATE.READY;
                     }
                     catch (Exception e)
@@ -206,52 +207,35 @@ namespace Bootlegger.App.Lib
 
             imagestodownload = new List<ImagesCreateParameters>();
 
-            //download images needed
-            imagestodownload.Add(new ImagesCreateParameters()
-            {
-                FromImage = "mvertes/alpine-mongo",
-                Tag = "latest"
-            });
+            //load from yaml:
+            var Document = File.ReadAllText("docker-compose.yml");
+            var input = new StringReader(Document);
 
-            imagestodownload.Add(new ImagesCreateParameters()
-            {
-                FromImage = "redis",
-                Tag = "alpine"
-            });
+            // Load the stream
+            var yaml = new YamlStream();
+            yaml.Load(input);
+            var mapping = (YamlMappingNode)yaml.Documents[0].RootNode;
 
-            imagestodownload.Add(new ImagesCreateParameters()
+            foreach (var entry in mapping.Children)
             {
-                FromImage = "jwilder/docker-gen",
-                Tag = "latest"
-            });
-
-            imagestodownload.Add(new ImagesCreateParameters()
-            {
-                FromImage = "kusmierz/beanstalkd",
-                Tag = "latest"
-            });
-
-            imagestodownload.Add(new ImagesCreateParameters()
-            {
-                FromImage = "bootlegger/transcode-server",
-                Tag = "latest"
-            });
-
-            imagestodownload.Add(new ImagesCreateParameters()
-            {
-                FromImage = "nginx:alpine"
-            });
-
-            //imagestodownload.Add(new ImagesCreateParameters()
-            //{
-            //    FromImage = "jwilder/docker-gen"
-            //});
-
-            imagestodownload.Add(new ImagesCreateParameters()
-            {
-                FromImage = "bootlegger/server-app",
-                Tag = "latest"
-            });
+                if ((entry.Key as YamlScalarNode).Value == "services")
+                {
+                    foreach (var service in (entry.Value as YamlMappingNode).Children)
+                    {
+                        //Console.WriteLine(service.Key);
+                        var key = new YamlScalarNode("image");
+                        var image = ((service.Value as YamlMappingNode).Children[key] as YamlScalarNode).Value;
+                        var img = image.Split(':');
+                        imagestodownload.Add(new ImagesCreateParameters()
+                        { 
+                            FromImage = img[0],
+                            Tag = (img.Length > 1)?img[1] : "latest"
+                        });
+                        //Console.WriteLine(image);
+                    }
+                    //output.WriteLine(((YamlScalarNode)entry.Key).Value);
+                }
+            }
 
             List<Task> tasks = new List<Task>();
 
@@ -267,12 +251,16 @@ namespace Bootlegger.App.Lib
                         if (forceupdate)
                             throw new Exception("Must update");
                         var exists = await dockerclient.Images.InspectImageAsync(im.FromImage, cancel);
-                        CurrentDownload++;
-                        OnNextDownload(CurrentDownload, imagestodownload.Count, CurrentDownload / (double)imagestodownload.Count);
+                        //CurrentDownload++;
+                        //OnNextDownload(CurrentDownload, imagestodownload.Count, CurrentDownload / (double)imagestodownload.Count);
                     }
                     catch
                     {
                         await dockerclient.Images.CreateImageAsync(im, null, this, cancel);
+                        //CurrentDownload++;
+                    }
+                    finally
+                    {
                         CurrentDownload++;
                         OnNextDownload(CurrentDownload, imagestodownload.Count, CurrentDownload / (double)imagestodownload.Count);
                     }
@@ -283,104 +271,128 @@ namespace Bootlegger.App.Lib
         }
 
 
-        private async Task StartContainer(CreateContainerParameters param)
-        {
-            try
-            {
-                //check if containers are running:
-                var spec = await dockerclient.Containers.InspectContainerAsync(param.Name);
-                await dockerclient.Containers.StartContainerAsync(spec.ID, null);
-            }
-            catch
-            {
-                await dockerclient.Containers.CreateContainerAsync(param);
-            }
-        }
+        //private async Task StartContainer(CreateContainerParameters param)
+        //{
+        //    try
+        //    {
+        //        //check if containers are running:
+        //        var spec = await dockerclient.Containers.InspectContainerAsync(param.Name);
+        //        await dockerclient.Containers.StartContainerAsync(spec.ID, null);
+        //    }
+        //    catch
+        //    {
+        //        await dockerclient.Containers.CreateContainerAsync(param);
+        //    }
+        //}
 
-        private async Task<VolumeResponse> CreateVolume(VolumesCreateParameters param)
-        {
-            try
-            {
-                return await dockerclient.Volumes.InspectAsync(param.Name);
-            }
-            catch
-            {
-                return await dockerclient.Volumes.CreateAsync(param);
-            }
-        }
+        //private async Task<VolumeResponse> CreateVolume(VolumesCreateParameters param)
+        //{
+        //    try
+        //    {
+        //        return await dockerclient.Volumes.InspectAsync(param.Name);
+        //    }
+        //    catch
+        //    {
+        //        return await dockerclient.Volumes.CreateAsync(param);
+        //    }
+        //}
 
         public event Action<string> OnLog;
+
+        Process currentProcess;
 
         //start containers...
         public async Task<bool> RunServer()
         {
-            //if not running:
-            Process dc = new Process();
-            dc.StartInfo = new ProcessStartInfo("docker-compose");
-            dc.StartInfo.WorkingDirectory = Directory.GetCurrentDirectory();
-            dc.StartInfo.Arguments = "-p bootleggerlocal up -d";
-            dc.StartInfo.Environment.Add("MYIP", GetLocalIPAddress());
-            dc.StartInfo.UseShellExecute = false;
-            dc.StartInfo.CreateNoWindow = true;
-            dc.StartInfo.RedirectStandardOutput = true;
-            dc.StartInfo.RedirectStandardError = true;
-
-            dc.Start();
-            dc.BeginOutputReadLine();
-            dc.BeginErrorReadLine();
-
-            dc.OutputDataReceived += (s, o) =>
+            try
             {
-                OnLog?.Invoke(o.Data);
-            };
 
-            dc.ErrorDataReceived += (s, o) =>
-            {
-                OnLog?.Invoke(o.Data);
-            };
-
-            await Task.Run(() =>
-            {
-                dc.WaitForExit();
-            });
-
-            WebClient client = new WebClient();
-    
-            bool connected = false;
-            int count = 0;
-            while (!connected && count < 10)
-            {
-                try
+                if (currentProcess != null && !currentProcess.HasExited)
                 {
-                    var result = await client.DownloadStringTaskAsync($"http://{GetLocalIPAddress()}/status");
-                    connected = true;
+                    currentProcess.Close();
                 }
-                catch {
-                    await Task.Delay(5000);
-                }
-                finally
+                //if not running:
+                currentProcess = new Process();
+                currentProcess.StartInfo = new ProcessStartInfo("docker-compose");
+                currentProcess.StartInfo.WorkingDirectory = Directory.GetCurrentDirectory();
+                currentProcess.StartInfo.Arguments = "-p bootleggerlocal up -d";
+                currentProcess.StartInfo.Environment.Add("MYIP", GetLocalIPAddress());
+                currentProcess.StartInfo.UseShellExecute = false;
+                currentProcess.StartInfo.CreateNoWindow = true;
+                currentProcess.StartInfo.RedirectStandardOutput = true;
+                currentProcess.StartInfo.RedirectStandardError = true;
+
+                currentProcess.Start();
+                currentProcess.BeginOutputReadLine();
+                currentProcess.BeginErrorReadLine();
+
+                currentProcess.OutputDataReceived += (s, o) =>
                 {
-                    count++;
+                    if (o.Data != null)
+                        OnLog?.Invoke(o.Data.Trim());
+                };
+
+                currentProcess.ErrorDataReceived += (s, o) =>
+                {
+                    if (o.Data != null)
+                        OnLog?.Invoke(o.Data.Trim());
+                };
+
+                await Task.Run(() =>
+                {
+                    currentProcess.WaitForExit();
+                });
+
+                WebClient client = new WebClient();
+
+                bool connected = false;
+                int count = 0;
+                while (!connected && count < 3)
+                {
+                    try
+                    {
+                        var result = await client.DownloadStringTaskAsync($"http://{GetLocalIPAddress()}/status");
+                        connected = true;
+                    }
+                    catch
+                    {
+                        await Task.Delay(5000);
+                    }
+                    finally
+                    {
+                        count++;
+                    }
                 }
+
+
+                return connected;
             }
-
-            return dc.ExitCode == 0;
+            catch
+            {
+                return false;
+            }
         }
 
         //stop containers
         public async Task StopServer()
         {
+            if (currentProcess != null && !currentProcess.HasExited)
+            {
+                currentProcess.Close();
+            }
+            
+
             try
             {
-                Process dc = new Process();
-                dc.StartInfo = new ProcessStartInfo("docker-compose");
-                dc.StartInfo.Arguments = "-p bootleggerlocal stop";
-                dc.StartInfo.UseShellExecute = false;
-                dc.StartInfo.CreateNoWindow = true;
-                dc.Start();
+                currentProcess = new Process();
+                currentProcess.StartInfo = new ProcessStartInfo("docker-compose");
+                currentProcess.StartInfo.Arguments = "-p bootleggerlocal stop";
+                currentProcess.StartInfo.UseShellExecute = false;
+                currentProcess.StartInfo.CreateNoWindow = true;
+                currentProcess.Start();
                 await Task.Run(() =>
                 {
-                    dc.WaitForExit();
+                    currentProcess.WaitForExit();
                 });
             }
             catch

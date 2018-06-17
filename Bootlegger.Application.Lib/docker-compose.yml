@@ -21,12 +21,14 @@ services:
       - web
 
   redis:
+    restart: always
     image: redis:alpine
     command: redis-server --appendonly yes
     volumes:
       - redis-data:/data
 
   mongo:
+    restart: always
     image: mvertes/alpine-mongo
     ports:
       - "27017:27017"
@@ -34,14 +36,8 @@ services:
       - mongo-data:/data/db
 
   beanstalk:
+    restart: always
     image: kusmierz/beanstalkd
-
-  # vault:
-  #   image: bootlegger/server-app:latest
-  #   restart: always
-  #   volumes:
-  #     - "./upload:/usr/src/app/upload"   
-  #   command: nodemon vault/index.js
 
   worker:
     image: bootlegger/transcode-server:latest
@@ -69,5 +65,3 @@ services:
       - "./upload:/usr/src/app/upload"
     environment:
       - MYIP=10.10.10.1
-      - VIRTUAL_HOST=localhost
-      - VIRTUAL_PORT=1337

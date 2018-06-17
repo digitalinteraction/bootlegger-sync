@@ -3,6 +3,7 @@ using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
+using System.Text.RegularExpressions;
 using System.Threading.Tasks;
 using System.Windows;
 using System.Windows.Controls;
@@ -51,8 +52,12 @@ namespace Bootlegger.App.Win
         {
             Dispatcher.BeginInvoke(new Action(() =>
             {
-                log.AppendText(obj?.Trim('\n','\r')+"\r");
-                log.ScrollToEnd();
+                obj = Regex.Replace(obj, @"[^\u0020-\u007F]+", string.Empty);
+                if (obj.Length > 0)
+                {
+                    log.AppendText($"{DateTime.Now.ToShortTimeString()} - {obj.Trim('\n', '\r')}\r");
+                    log.ScrollToEnd();
+                }
             }));
         }
 
@@ -66,7 +71,7 @@ namespace Bootlegger.App.Win
             App.BootleggerApp.OpenFolder();
         }
 
-        private async void continuebtn_Copy1_Click(object sender, RoutedEventArgs e)
+        private void continuebtn_Copy1_Click(object sender, RoutedEventArgs e)
         {
             //update
             (Application.Current.MainWindow as MainWindow)._mainFrame.Content = new DownloadImages(true);

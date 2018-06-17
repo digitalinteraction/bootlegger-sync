@@ -1,4 +1,5 @@
-﻿using System;
+﻿using MahApps.Metro.Controls;
+using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
@@ -12,6 +13,7 @@ using System.Windows.Media;
 using System.Windows.Media.Imaging;
 using System.Windows.Navigation;
 using System.Windows.Shapes;
+using MahApps.Metro.Controls.Dialogs;
 
 namespace Bootlegger.App.Win
 {
@@ -58,7 +60,8 @@ namespace Bootlegger.App.Win
             }
             else
             {
-                MessageBox.Show("Check Docker is running and try again");
+                await (App.Current.MainWindow as MetroWindow).ShowMessageAsync("Error", "Check Docker is running and try again");
+                //MessageBox.Show("Check Docker is running and try again");
             }
         }
 

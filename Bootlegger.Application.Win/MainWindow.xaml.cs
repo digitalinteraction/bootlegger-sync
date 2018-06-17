@@ -39,26 +39,44 @@ namespace Bootlegger.App.Win
         }
 
         bool canexit = false;
+        bool closing = false;
 
         private async void MainWindow_Closing(object sender, System.ComponentModel.CancelEventArgs e)
         {
+            if (closing)
+            {
+                e.Cancel = true;
+                return;
+            }
+
+
+
             if (!canexit)
             {
                 e.Cancel = true;
                 var tt = await (App.Current.MainWindow as MetroWindow).ShowMessageAsync("Continue?", "Closing this application will prevent access to Our Story", MessageDialogStyle.AffirmativeAndNegative);
                 if (tt == MessageDialogResult.Affirmative)
                 {
+                    closing = true;
+                    _mainFrame.Visibility = Visibility.Collapsed;
+                    progress.Visibility = Visibility.Visible;
+                    await App.BootleggerApp.StopServer();
                     canexit = true;
+                    closing = false;
                     Close();
                 }
-                else
-                    canexit = false;
             }
-            else
-            {
-                await App.BootleggerApp.StopServer();
-                //App.BootleggerApp.StopWifi();
-            }
+
+
+            //if (!canexit)
+            //{
+                
+            //}
+            //else
+            //{
+                
+            //    //App.BootleggerApp.StopWifi();
+            //}
         }
 
         private async void MainWindow_Initialized(object sender, EventArgs e)
