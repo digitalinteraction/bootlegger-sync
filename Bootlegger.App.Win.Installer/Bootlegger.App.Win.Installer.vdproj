@@ -231,6 +231,12 @@
         }
         "Entry"
         {
+        "MsmKey" = "8:_6D957209E1591642D3D449915E9F3ADE"
+        "OwnerKey" = "8:_65E10826A838486CB805AE80584177EE"
+        "MsmSig" = "8:_UNDEFINED"
+        }
+        "Entry"
+        {
         "MsmKey" = "8:_71B4BDADEFA54F5090A22C30D1733839"
         "OwnerKey" = "8:_UNDEFINED"
         "MsmSig" = "8:_UNDEFINED"
@@ -478,13 +484,13 @@
         "Entry"
         {
         "MsmKey" = "8:_UNDEFINED"
-        "OwnerKey" = "8:_11506A0039E8CBF27EE18F2EF1E9B560"
+        "OwnerKey" = "8:_65E10826A838486CB805AE80584177EE"
         "MsmSig" = "8:_UNDEFINED"
         }
         "Entry"
         {
         "MsmKey" = "8:_UNDEFINED"
-        "OwnerKey" = "8:_65E10826A838486CB805AE80584177EE"
+        "OwnerKey" = "8:_6D957209E1591642D3D449915E9F3ADE"
         "MsmSig" = "8:_UNDEFINED"
         }
         "Entry"
@@ -859,6 +865,12 @@
         "OwnerKey" = "8:_7D0844138518875BA9B01A4A15F45F41"
         "MsmSig" = "8:_UNDEFINED"
         }
+        "Entry"
+        {
+        "MsmKey" = "8:_UNDEFINED"
+        "OwnerKey" = "8:_11506A0039E8CBF27EE18F2EF1E9B560"
+        "MsmSig" = "8:_UNDEFINED"
+        }
     }
     "Configurations"
     {
@@ -877,6 +889,14 @@
         "PrivateKeyFile" = "8:"
         "TimeStampServer" = "8:"
         "InstallerBootstrapper" = "3:2"
+            "BootstrapperCfg:{63ACBE69-63AA-4F98-B2B6-99F9E24495F2}"
+            {
+            "Enabled" = "11:TRUE"
+            "PromptEnabled" = "11:TRUE"
+            "PrerequisitesLocation" = "2:1"
+            "Url" = "8:"
+            "ComponentsUrl" = "8:"
+            }
         }
         "Release"
         {
@@ -893,6 +913,22 @@
         "PrivateKeyFile" = "8:"
         "TimeStampServer" = "8:"
         "InstallerBootstrapper" = "3:2"
+            "BootstrapperCfg:{63ACBE69-63AA-4F98-B2B6-99F9E24495F2}"
+            {
+            "Enabled" = "11:TRUE"
+            "PromptEnabled" = "11:TRUE"
+            "PrerequisitesLocation" = "2:1"
+            "Url" = "8:"
+            "ComponentsUrl" = "8:"
+                "Items"
+                {
+                    "{EDC2488A-8267-493A-A98E-7D9C3B36CDF3}:.NETFramework,Version=v4.6.1"
+                    {
+                    "Name" = "8:Microsoft .NET Framework 4.6.1 (x86 and x64)"
+                    "ProductCode" = "8:.NETFramework,Version=v4.6.1"
+                    }
+                }
+            }
         }
     }
     "Deployable"
@@ -1691,7 +1727,7 @@
             "SharedLegacy" = "11:FALSE"
             "PackageAs" = "3:1"
             "Register" = "3:1"
-            "Exclude" = "11:TRUE"
+            "Exclude" = "11:FALSE"
             "IsDependency" = "11:TRUE"
             "IsolateTo" = "8:"
             }
@@ -1722,7 +1758,7 @@
             "SharedLegacy" = "11:FALSE"
             "PackageAs" = "3:1"
             "Register" = "3:1"
-            "Exclude" = "11:TRUE"
+            "Exclude" = "11:FALSE"
             "IsDependency" = "11:TRUE"
             "IsolateTo" = "8:"
             }
@@ -1784,7 +1820,7 @@
             "SharedLegacy" = "11:FALSE"
             "PackageAs" = "3:1"
             "Register" = "3:1"
-            "Exclude" = "11:TRUE"
+            "Exclude" = "11:FALSE"
             "IsDependency" = "11:TRUE"
             "IsolateTo" = "8:"
             }
@@ -1864,6 +1900,37 @@
                     }
                 }
             "SourcePath" = "8:System.Reflection.Extensions.dll"
+            "TargetName" = "8:"
+            "Tag" = "8:"
+            "Folder" = "8:_B214B1B3EBA84645BABEF370A996E37D"
+            "Condition" = "8:"
+            "Transitive" = "11:FALSE"
+            "Vital" = "11:TRUE"
+            "ReadOnly" = "11:FALSE"
+            "Hidden" = "11:FALSE"
+            "System" = "11:FALSE"
+            "Permanent" = "11:FALSE"
+            "SharedLegacy" = "11:FALSE"
+            "PackageAs" = "3:1"
+            "Register" = "3:1"
+            "Exclude" = "11:FALSE"
+            "IsDependency" = "11:TRUE"
+            "IsolateTo" = "8:"
+            }
+            "{9F6F8455-1EF1-4B85-886A-4223BCC8E7F7}:_6D957209E1591642D3D449915E9F3ADE"
+            {
+            "AssemblyRegister" = "3:1"
+            "AssemblyIsInGAC" = "11:FALSE"
+            "AssemblyAsmDisplayName" = "8:YamlDotNet, Version=0.0.0.0, Culture=neutral, processorArchitecture=MSIL"
+                "ScatterAssemblies"
+                {
+                    "_6D957209E1591642D3D449915E9F3ADE"
+                    {
+                    "Name" = "8:YamlDotNet.dll"
+                    "Attributes" = "3:512"
+                    }
+                }
+            "SourcePath" = "8:YamlDotNet.dll"
             "TargetName" = "8:"
             "Tag" = "8:"
             "Folder" = "8:_B214B1B3EBA84645BABEF370A996E37D"
@@ -2176,7 +2243,7 @@
             "SharedLegacy" = "11:FALSE"
             "PackageAs" = "3:1"
             "Register" = "3:1"
-            "Exclude" = "11:TRUE"
+            "Exclude" = "11:FALSE"
             "IsDependency" = "11:TRUE"
             "IsolateTo" = "8:"
             }
@@ -3041,6 +3108,17 @@
             "Property" = "8:ProgramMenuFolder"
                 "Folders"
                 {
+                    "{9EF0B969-E518-4E46-987F-47570745A589}:_935C7CEBF87D43A0BF3CD8EA7C29ADC6"
+                    {
+                    "Name" = "8:Our Story Standalone"
+                    "AlwaysCreate" = "11:FALSE"
+                    "Condition" = "8:"
+                    "Transitive" = "11:FALSE"
+                    "Property" = "8:_D217E2D6D28F4D5CBBD9E6DD9B67480D"
+                        "Folders"
+                        {
+                        }
+                    }
                 }
             }
             "{1525181F-901A-416C-8A58-119130FE478E}:_A45BFC42CC084ABA9F1BAFFAFDF0D264"
@@ -3090,7 +3168,7 @@
         "Name" = "8:Microsoft Visual Studio"
         "ProductName" = "8:Our Story Standalone"
         "ProductCode" = "8:{34A7C04E-CB8F-445F-BA64-2B79185309C4}"
-        "PackageCode" = "8:{987635A2-F9EF-470D-A2DA-D8F21A6265C4}"
+        "PackageCode" = "8:{65611C9F-A65B-4CF4-BCDC-FBC1B070C567}"
         "UpgradeCode" = "8:{7016BCA9-4D43-4C42-80A9-04D1C6DA2405}"
         "AspNetVersion" = "8:4.0.30319.0"
         "RestartWWWService" = "11:FALSE"
@@ -3220,6 +3298,20 @@
             "Transitive" = "11:FALSE"
             "Target" = "8:_65E10826A838486CB805AE80584177EE"
             "Folder" = "8:_A45BFC42CC084ABA9F1BAFFAFDF0D264"
+            "WorkingFolder" = "8:_B214B1B3EBA84645BABEF370A996E37D"
+            "Icon" = "8:_116DF89548A141FEA830CA697636D1E5"
+            "Feature" = "8:"
+            }
+            "{970C0BB2-C7D0-45D7-ABFA-7EC378858BC0}:_426A6223CF934D25986B3A1CD2D4F9F5"
+            {
+            "Name" = "8:Our Story Standalone"
+            "Arguments" = "8:"
+            "Description" = "8:"
+            "ShowCmd" = "3:1"
+            "IconIndex" = "3:0"
+            "Transitive" = "11:FALSE"
+            "Target" = "8:_65E10826A838486CB805AE80584177EE"
+            "Folder" = "8:_935C7CEBF87D43A0BF3CD8EA7C29ADC6"
             "WorkingFolder" = "8:_B214B1B3EBA84645BABEF370A996E37D"
             "Icon" = "8:_116DF89548A141FEA830CA697636D1E5"
             "Feature" = "8:"
