@@ -85,21 +85,24 @@ namespace Bootlegger.App.Lib
             catch (Exception e)
             {
                 CurrentState = RUNNING_STATE.NO_DOCKER;
-            }                
+            }
+
+            //CurrentState = RUNNING_STATE.NO_DOCKER;
+
+            await Task.Run(() =>
+            {
+                //start docker connection
+                switch (CurrentPlatform.Platform)
+                {
+                    case PlatformID.Win32NT:
+                        dockerclient = new DockerClientConfiguration(new Uri("npipe://./pipe/docker_engine")).CreateClient();
+                        break;
+                }
+            });
 
             if (CurrentState == RUNNING_STATE.NO_IMAGES)
             {
-                await Task.Run(() =>
-                {
-                    //start docker connection
-                    switch (CurrentPlatform.Platform)
-                    {
-                        case PlatformID.Win32NT:
-                            dockerclient = new DockerClientConfiguration(new Uri("npipe://./pipe/docker_engine")).CreateClient();
-                            break;
-                    }
-                });
-
+                
                 Task containers = dockerclient.Containers.ListContainersAsync(new Docker.DotNet.Models.ContainersListParameters() { All = true });
                 if (await Task.WhenAny(containers, Task.Delay(10000)) == containers)
                 {
