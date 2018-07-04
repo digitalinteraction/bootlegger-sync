@@ -16,6 +16,7 @@
             <Button Content="Documentation" Click="Button_Click" />
         </Controls:WindowCommands>
     </Controls:MetroWindow.RightWindowCommands>
+    
 
     <Grid>
         <Controls:TransitioningContentControl x:Name="_mainFrame" Transition="LeftReplace" />

@@ -16,15 +16,20 @@
         <StackPanel Margin="20" Orientation="Vertical" Grid.Column="0">
             <Label Padding="0" Content="Running" VerticalAlignment="Top" FontFamily="Segoe UI Light" FontSize="36" Height="60"/>
             <Label Padding="0" x:Name="progress" Content="starting..." Margin="0" VerticalAlignment="Top" FontSize="18" Foreground="#CCE51400"/>
-            <Grid Background="#FF2C2C2C" Margin="50,40" VerticalAlignment="Center">
-                <Image Source="ic_wifi_white_48dp_2x.png" HorizontalAlignment="Left" VerticalAlignment="Center" Width="50" Margin="10" />
-                <Label x:Name="ssid" Content="starting..." HorizontalAlignment="Right" VerticalAlignment="Center" Margin="0,0,10,0" Foreground="#CCE51400" FontSize="18" />
-                <Label x:Name="pwd" Content="starting..." HorizontalAlignment="Right" VerticalAlignment="Top" Margin="0,34,10,0" Foreground="#CCE51400" Visibility="Collapsed"/>
-            </Grid>
+
+            <Label>Administration</Label>
+
+            <Button x:Name="continuebtn" Style="{DynamicResource SquareButtonStyle}" Content="Our Story Configuration" BorderThickness="0.5" Padding="8" Click="continuebtn_Click" Custom:ControlsHelper.ContentCharacterCasing="Upper"/>
+            <Button x:Name="continuebtn_Copy" Style="{DynamicResource SquareButtonStyle}" Content="open Video Files folder"  BorderThickness="0.5" Padding="8" Click="continuebtn_Copy_Click" Custom:ControlsHelper.ContentCharacterCasing="Upper"/>
+
+            <Label>Backup</Label>
+            <Button x:Name="backupbtn" Style="{DynamicResource SquareButtonStyle}" Content="Backup Data" BorderThickness="0.5" Padding="8" Click="backupbtn_Click" Custom:ControlsHelper.ContentCharacterCasing="Upper"/>
+            <Button x:Name="restorebtn" Style="{DynamicResource SquareButtonStyle}" Content="Restore Data" BorderThickness="0.5" Padding="8" Click="restorebtn_Click" Custom:ControlsHelper.ContentCharacterCasing="Upper"/>
+
+            <Label>Update</Label>
+
+            <Button Grid.Column="0" x:Name="continuebtn_Copy1" Style="{DynamicResource SquareButtonStyle}" Content="update application" BorderThickness="0.5" Padding="8" VerticalAlignment="Bottom" Click="continuebtn_Copy1_Click" Custom:ControlsHelper.ContentCharacterCasing="Upper" BorderBrush="{x:Null}"/>
         </StackPanel>
-        <Button Grid.Column="0" x:Name="continuebtn" Style="{DynamicResource SquareButtonStyle}" Content="Admin Panel" HorizontalAlignment="Right" Margin="0,0,10,10" BorderThickness="0.5" Padding="8" VerticalAlignment="Bottom" Click="continuebtn_Click" Custom:ControlsHelper.ContentCharacterCasing="Upper"/>
-        <Button Grid.Column="0" x:Name="continuebtn_Copy" Style="{DynamicResource SquareButtonStyle}" Content="open Video Files folder" HorizontalAlignment="Right" Margin="0,0,110,10" BorderThickness="0.5" Padding="8" VerticalAlignment="Bottom" Click="continuebtn_Copy_Click" Custom:ControlsHelper.ContentCharacterCasing="Upper"/>
-        <Button Grid.Column="0" x:Name="continuebtn_Copy1" Style="{DynamicResource SquareButtonStyle}" Content="update" HorizontalAlignment="Left" Margin="10" BorderThickness="0.5" Padding="8" VerticalAlignment="Bottom" Click="continuebtn_Copy1_Click" Custom:ControlsHelper.ContentCharacterCasing="Upper" BorderBrush="{x:Null}"/>
         <RichTextBox IsReadOnly="True" Grid.Column="1" x:Name="log" Margin="0,0,0,53" BorderBrush="Transparent"></RichTextBox>
     </Grid>
 </ContentControl>

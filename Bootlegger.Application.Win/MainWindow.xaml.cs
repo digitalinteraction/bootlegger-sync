@@ -95,19 +95,19 @@ namespace Bootlegger.App.Win
             }
             progress.Visibility = Visibility.Hidden;
 
+
+            //await App.BootleggerApp.DownloadImages(false,new CancellationTokenSource().Token);
+
+            //App.BootleggerApp.CurrentState = Lib.BootleggerApplication.RUNNING_STATE.NOT_SUPPORTED;
+
             switch (App.BootleggerApp.CurrentState)
             {
-                case Lib.BootleggerApplication.RUNNING_STATE.NOT_SUPORTED:
-                    //close with error
-                    await (App.Current.MainWindow as MetroWindow).ShowMessageAsync("Message", "This OS is not supported, please try on another system");
-                    //MessageBox.Show("This OS is not supported, please try on another system");
-                    Environment.Exit(1);
-                    break;
-
+                case Lib.BootleggerApplication.RUNNING_STATE.NOT_SUPPORTED:
                 case Lib.BootleggerApplication.RUNNING_STATE.NO_DOCKER:
                 case Lib.BootleggerApplication.RUNNING_STATE.NO_IMAGES:
                 case Lib.BootleggerApplication.RUNNING_STATE.NO_DOCKER_RUNNING:
-                    _mainFrame.Content = new Intro();
+                case Lib.BootleggerApplication.RUNNING_STATE.NOWIFICONFIG:
+                    _mainFrame.Content = new Checklist();
                     break;
                 case Lib.BootleggerApplication.RUNNING_STATE.READY:
                     //show status (logs, window to open, location of directory of videos)

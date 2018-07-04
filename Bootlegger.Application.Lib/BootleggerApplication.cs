@@ -1,5 +1,7 @@
 ﻿using Docker.DotNet;
 using Docker.DotNet.Models;
+using MongoDB.Bson;
+using MongoDB.Driver;
 using Rssdp;
 using System;
 using System.Collections.Generic;
@@ -12,12 +14,15 @@ using System.Text;
 using System.Threading;
 using System.Threading.Tasks;
 using YamlDotNet.RepresentationModel;
+using System.Management;
 
 namespace Bootlegger.App.Lib
 {
     public class BootleggerApplication:IProgress<JSONMessage>
     {
-        public enum RUNNING_STATE { NOT_SUPORTED, NO_DOCKER, NO_DOCKER_RUNNING, NO_IMAGES, READY, RUNNING }
+        public enum RUNNING_STATE { NOT_SUPPORTED, NO_DOCKER, NO_DOCKER_RUNNING, NO_IMAGES, READY, RUNNING,
+            NOWIFICONFIG
+        }
 
         public RUNNING_STATE CurrentState { get; private set; }
         public OperatingSystem CurrentPlatform { get; private set; }
@@ -48,6 +53,20 @@ namespace Bootlegger.App.Lib
             //throw new Exception("Local IP Address Not Found!");
         }
 
+        async Task StartDockerClient()
+        {
+            await Task.Run(() =>
+            {
+                //start docker connection
+                switch (CurrentPlatform.Platform)
+                {
+                    case PlatformID.Win32NT:
+                        dockerclient = new DockerClientConfiguration(new Uri("npipe://./pipe/docker_engine")).CreateClient();
+                        break;
+                }
+            });
+        }
+
         public async Task Start()
         {
             _Publisher = new SsdpDevicePublisher();
@@ -69,13 +88,12 @@ namespace Bootlegger.App.Lib
 
             if (CurrentPlatform.Platform == PlatformID.Win32Windows || CurrentPlatform.Platform == PlatformID.Unix)
             {
-                CurrentState = RUNNING_STATE.NOT_SUPORTED;
+                CurrentState = RUNNING_STATE.NOT_SUPPORTED;
                 return;
             }
 
             /////FOR DEBUG
-            //CurrentState = RUNNING_STATE.RUNNING;
-            //return;
+            
 
 
             try
@@ -89,16 +107,11 @@ namespace Bootlegger.App.Lib
 
             //CurrentState = RUNNING_STATE.NO_DOCKER;
 
-            await Task.Run(() =>
-            {
-                //start docker connection
-                switch (CurrentPlatform.Platform)
-                {
-                    case PlatformID.Win32NT:
-                        dockerclient = new DockerClientConfiguration(new Uri("npipe://./pipe/docker_engine")).CreateClient();
-                        break;
-                }
-            });
+            //CurrentState = RUNNING_STATE.NO_DOCKER;
+            //return;
+
+            await StartDockerClient();
+            
 
             if (CurrentState == RUNNING_STATE.NO_IMAGES)
             {
@@ -110,7 +123,10 @@ namespace Bootlegger.App.Lib
                     try
                     {
                         var exists = await dockerclient.Images.InspectImageAsync("bootlegger/server-app");
-                        CurrentState = RUNNING_STATE.READY;
+                        if (WiFiSettingsOk)
+                            CurrentState = RUNNING_STATE.READY;
+                        else
+                            CurrentState = RUNNING_STATE.NOWIFICONFIG;
                     }
                     catch (Exception e)
                     {
@@ -125,9 +141,42 @@ namespace Bootlegger.App.Lib
             }
         }
 
+        internal Task RestoreDatabase()
+        {
+            throw new NotImplementedException();
+        }
+
         internal void OpenDownloadLink()
         {
             System.Diagnostics.Process.Start(DockerLink);
+        }
+
+        public void ConfigureNetwork(string ip_address, string subnet_mask)
+        {
+            ManagementClass objMC =
+              new ManagementClass("Win32_NetworkAdapterConfiguration");
+            ManagementObjectCollection objMOC = objMC.GetInstances();
+
+            foreach (ManagementObject objMO in objMOC)
+            {
+                if ((bool)objMO["IPEnabled"])
+                {
+                    var gateways = (objMO["DefaultIPGateway"] as string[]);
+                    var gateway = gateways?[0];
+
+                    if (gateway?.StartsWith("10.10.10") ?? false)
+                    {
+                        ManagementBaseObject setIP;
+                        ManagementBaseObject newIP =
+                          objMO.GetMethodParameters("EnableStatic");
+
+                        newIP["IPAddress"] = new string[] { ip_address };
+                        newIP["SubnetMask"] = new string[] { subnet_mask };
+
+                        setIP = objMO.InvokeMethod("EnableStatic", newIP, null);
+                    }
+                }
+            }
         }
 
         public async Task CheckDocker()
@@ -182,7 +231,10 @@ namespace Bootlegger.App.Lib
                 switch (CurrentPlatform.Platform)
                 {
                     case PlatformID.Win32NT:
-                        return "https://store.docker.com/editions/community/docker-ce-desktop-windows";
+                        if (Environment.Version.Major >= 10)
+                            return "https://download.docker.com/win/stable/Docker%20for%20Windows%20Installer.exe";
+                        else
+                            return "https://download.docker.com/win/stable/DockerToolbox.exe";
                     case PlatformID.MacOSX:
                         return "https://store.docker.com/editions/community/docker-ce-desktop-mac";
                     default:
@@ -190,6 +242,8 @@ namespace Bootlegger.App.Lib
                 }
             }
         }
+
+        public bool WiFiSettingsOk { get => false; }
 
         public void OpenAdminPanel()
         {
@@ -201,104 +255,120 @@ namespace Bootlegger.App.Lib
             System.Diagnostics.Process.Start("https://our-story.gitbook.io/standalone");
         }
 
+
+        public async Task BackupDatabase()
+        {
+            var dirname = DateTime.Now.ToFileTime();
+            Directory.CreateDirectory($"backup\\{dirname}");
+            var client = new MongoClient("mongodb://localhost:27017");
+            var database = client.GetDatabase("bootlegger");
+            var tables = await database.ListCollectionNamesAsync();
+            foreach (var col in tables.ToList())
+            {
+                StreamWriter writer = new StreamWriter($"backup\\{dirname}\\{col}.json");
+                var collection = database.GetCollection<BsonDocument>(col);
+                await collection.Find(new BsonDocument()).ForEachAsync(d =>
+                    writer.WriteLine(d.ToJson())
+                );
+                //Console.WriteLine("DONE " + col);
+                await writer.FlushAsync();
+                writer.Close();
+
+            }
+            //Console.WriteLine("DONE");
+        }
+
         List<ImagesCreateParameters> imagestodownload;
         private int CurrentDownload = 0;
 
         public async Task DownloadImages(bool forceupdate, CancellationToken cancel)
         {
-            CurrentDownload = 1;
-
-            imagestodownload = new List<ImagesCreateParameters>();
-
-            //load from yaml:
-            var Document = File.ReadAllText("docker-compose.yml");
-            var input = new StringReader(Document);
-
-            // Load the stream
-            var yaml = new YamlStream();
-            yaml.Load(input);
-            var mapping = (YamlMappingNode)yaml.Documents[0].RootNode;
-
-            foreach (var entry in mapping.Children)
+            if (dockerclient == null)
             {
-                if ((entry.Key as YamlScalarNode).Value == "services")
+                await StartDockerClient();
+            }
+
+            bool doonline = true;
+            if (!forceupdate)
+            {
+                //check if the local version of the images exists:
+                if (File.Exists("images.tar"))
                 {
-                    foreach (var service in (entry.Value as YamlMappingNode).Children)
-                    {
-                        //Console.WriteLine(service.Key);
-                        var key = new YamlScalarNode("image");
-                        var image = ((service.Value as YamlMappingNode).Children[key] as YamlScalarNode).Value;
-                        var img = image.Split(':');
-                        imagestodownload.Add(new ImagesCreateParameters()
-                        { 
-                            FromImage = img[0],
-                            Tag = (img.Length > 1)?img[1] : "latest"
-                        });
-                        //Console.WriteLine(image);
-                    }
-                    //output.WriteLine(((YamlScalarNode)entry.Key).Value);
+                    doonline = false;
+                    await dockerclient.Images.LoadImageAsync(new ImageLoadParameters(), File.OpenRead("images.tar"),this,cancel);
+                    OnNextDownload(1, 1, 1);
                 }
             }
 
-            List<Task> tasks = new List<Task>();
-
-            foreach(var im in imagestodownload)
+            if (doonline)
             {
-                if (!cancel.IsCancellationRequested)
-                {
-                    Layers.Clear();
+                CurrentDownload = 1;
 
-                    //detect if it exists:
-                    try
+                imagestodownload = new List<ImagesCreateParameters>();
+
+                //load from yaml:
+                var Document = File.ReadAllText("docker-compose.yml");
+                var input = new StringReader(Document);
+
+                // Load the stream
+                var yaml = new YamlStream();
+                yaml.Load(input);
+                var mapping = (YamlMappingNode)yaml.Documents[0].RootNode;
+
+                foreach (var entry in mapping.Children)
+                {
+                    if ((entry.Key as YamlScalarNode).Value == "services")
                     {
-                        if (forceupdate)
-                            throw new Exception("Must update");
-                        var exists = await dockerclient.Images.InspectImageAsync(im.FromImage, cancel);
-                        //CurrentDownload++;
-                        //OnNextDownload(CurrentDownload, imagestodownload.Count, CurrentDownload / (double)imagestodownload.Count);
-                    }
-                    catch
-                    {
-                        await dockerclient.Images.CreateImageAsync(im, null, this, cancel);
-                        //CurrentDownload++;
-                    }
-                    finally
-                    {
-                        CurrentDownload++;
-                        OnNextDownload(CurrentDownload, imagestodownload.Count, CurrentDownload / (double)imagestodownload.Count);
+                        foreach (var service in (entry.Value as YamlMappingNode).Children)
+                        {
+                            //Console.WriteLine(service.Key);
+                            var key = new YamlScalarNode("image");
+                            var image = ((service.Value as YamlMappingNode).Children[key] as YamlScalarNode).Value;
+                            var img = image.Split(':');
+                            imagestodownload.Add(new ImagesCreateParameters()
+                            {
+                                FromImage = img[0],
+                                Tag = (img.Length > 1) ? img[1] : "latest"
+                            });
+                            //Console.WriteLine(image);
+                        }
+                        //output.WriteLine(((YamlScalarNode)entry.Key).Value);
                     }
                 }
-                else
-                    break;
+
+                List<Task> tasks = new List<Task>();
+
+                foreach (var im in imagestodownload)
+                {
+                    if (!cancel.IsCancellationRequested)
+                    {
+                        Layers.Clear();
+
+                        //detect if it exists:
+                        try
+                        {
+                            if (forceupdate)
+                                throw new Exception("Must update");
+                            var exists = await dockerclient.Images.InspectImageAsync(im.FromImage, cancel);
+                            //CurrentDownload++;
+                            //OnNextDownload(CurrentDownload, imagestodownload.Count, CurrentDownload / (double)imagestodownload.Count);
+                        }
+                        catch
+                        {
+                            await dockerclient.Images.CreateImageAsync(im, null, this, cancel);
+                            //CurrentDownload++;
+                        }
+                        finally
+                        {
+                            CurrentDownload++;
+                            OnNextDownload(CurrentDownload, imagestodownload.Count, CurrentDownload / (double)imagestodownload.Count);
+                        }
+                    }
+                    else
+                        break;
+                }
             }
         }
-
-
-        //private async Task StartContainer(CreateContainerParameters param)
-        //{
-        //    try
-        //    {
-        //        //check if containers are running:
-        //        var spec = await dockerclient.Containers.InspectContainerAsync(param.Name);
-        //        await dockerclient.Containers.StartContainerAsync(spec.ID, null);
-        //    }
-        //    catch
-        //    {
-        //        await dockerclient.Containers.CreateContainerAsync(param);
-        //    }
-        //}
-
-        //private async Task<VolumeResponse> CreateVolume(VolumesCreateParameters param)
-        //{
-        //    try
-        //    {
-        //        return await dockerclient.Volumes.InspectAsync(param.Name);
-        //    }
-        //    catch
-        //    {
-        //        return await dockerclient.Volumes.CreateAsync(param);
-        //    }
-        //}
 
         public event Action<string> OnLog;
 
@@ -350,11 +420,11 @@ namespace Bootlegger.App.Lib
 
                 bool connected = false;
                 int count = 0;
-                while (!connected && count < 3)
+                while (!connected && count < 12)
                 {
                     try
                     {
-                        var result = await client.DownloadStringTaskAsync($"http://{GetLocalIPAddress()}/status");
+                        var result = await client.DownloadStringTaskAsync($"http://localhost/status");
                         connected = true;
                     }
                     catch
@@ -374,6 +444,32 @@ namespace Bootlegger.App.Lib
             {
                 return false;
             }
+        }
+
+        public async Task<bool> LiveServerCheck()
+        {
+            WebClient client = new WebClient();
+
+            bool connected = false;
+            int count = 0;
+            while (!connected && count < 3)
+            {
+                try
+                {
+                    var result = await client.DownloadStringTaskAsync($"http://{GetLocalIPAddress()}/status");
+                    connected = true;
+                }
+                catch
+                {
+                    await Task.Delay(10000);
+                }
+                finally
+                {
+                    count++;
+                }
+            }
+
+            return connected;
         }
 
         //stop containers
@@ -421,7 +517,7 @@ namespace Bootlegger.App.Lib
                 //Debug.WriteLine(value.ProgressMessage);
                 Layers[value.ID] = value.Progress.Current / (double)value.Progress.Total;
                 //Console.WriteLine(CurrentDownload);
-                OnDownloadProgress?.Invoke(value.Status, CurrentDownload, imagestodownload.Count, Layers, CurrentDownload / (double)imagestodownload.Count);
+                OnDownloadProgress?.Invoke("Downloading", CurrentDownload, imagestodownload.Count, Layers, CurrentDownload / (double)imagestodownload.Count);
             }
         }
     }

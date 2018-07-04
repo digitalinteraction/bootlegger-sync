@@ -46,7 +46,7 @@ namespace Bootlegger.App.Win
         private void continuebtn_Copy_Click(object sender, RoutedEventArgs e)
         {
             //back
-            (Application.Current.MainWindow as MainWindow)._mainFrame.Content = new Intro();
+            (Application.Current.MainWindow as MainWindow)._mainFrame.Content = new Checklist();
         }
 
         private async void continuebtn_Click(object sender, RoutedEventArgs e)

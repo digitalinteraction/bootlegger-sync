@@ -33,9 +33,9 @@ namespace Bootlegger.App.Win
             App.BootleggerApp.OnLog += BootleggerApp_OnLog;
             progress.Content = "Starting application...";
             //App.BootleggerApp.CreateWiFi("bootlegger","coolshot");
-            ssid.Content = $"http://{BootleggerApplication.GetLocalIPAddress()}";
+            //ssid.Content = $"http://{BootleggerApplication.GetLocalIPAddress()}";
             //ssid.Content = "SSID: bootlegger";
-            pwd.Content = "";
+            //pwd.Content = "";
             if (await App.BootleggerApp.RunServer())
             {
                 progress.Content = "Running";
@@ -75,6 +75,20 @@ namespace Bootlegger.App.Win
         {
             //update
             (Application.Current.MainWindow as MainWindow)._mainFrame.Content = new DownloadImages(true);
+        }
+
+        private async void backupbtn_Click(object sender, RoutedEventArgs e)
+        {
+            backupbtn.IsEnabled = false;
+            await App.BootleggerApp.BackupDatabase();
+            backupbtn.IsEnabled = true;
+        }
+
+        private async void restorebtn_Click(object sender, RoutedEventArgs e)
+        {
+            restorebtn.IsEnabled = false;
+            await App.BootleggerApp.RestoreDatabase();
+            restorebtn.IsEnabled = true;
         }
     }
 }
