@@ -317,7 +317,7 @@ namespace Bootlegger.App.Lib
 
         public void OpenDocs()
         {
-            System.Diagnostics.Process.Start("https://our-story.gitbook.io/standalone");
+            System.Diagnostics.Process.Start("https://standalone.ourstory.video");
         }
 
 
@@ -340,7 +340,6 @@ namespace Bootlegger.App.Lib
                 writer.Close();
 
             }
-            //Console.WriteLine("DONE");
         }
 
         List<ImagesCreateParameters> imagestodownload;
