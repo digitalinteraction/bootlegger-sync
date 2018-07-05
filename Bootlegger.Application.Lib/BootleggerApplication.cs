@@ -141,9 +141,38 @@ namespace Bootlegger.App.Lib
             }
         }
 
-        internal Task RestoreDatabase()
+        internal async Task RestoreDatabase(string pathtofiles)
         {
-            throw new NotImplementedException();
+            //danger!
+            var client = new MongoClient("mongodb://localhost:27017");
+            var database = client.GetDatabase("bootlegger");
+            var files = Directory.GetFiles(pathtofiles);
+
+            
+
+
+            foreach (var file in files)
+            {
+                StreamReader writer = new StreamReader($"{file}");
+
+                var colname = $"{new FileInfo(file).Name.Remove(new FileInfo(file).Name.Length - 5)}";
+
+                var table = database.GetCollection<BsonDocument>(colname);
+
+                //delete all entries
+                await table.DeleteManyAsync(new BsonDocument());
+
+                List <WriteModel<BsonDocument>> operations = new List<WriteModel<BsonDocument>>();
+                string line = "";
+                while ((line = writer.ReadLine()) != null)
+                {
+                    operations.Add(new InsertOneModel<BsonDocument>(BsonDocument.Parse(line)));
+                }
+
+                writer.Close();
+
+                var result = await table.BulkWriteAsync(operations);
+            }
         }
 
         internal void OpenDownloadLink()
@@ -166,14 +195,30 @@ namespace Bootlegger.App.Lib
 
                     if (gateway?.StartsWith("10.10.10") ?? false)
                     {
-                        ManagementBaseObject setIP;
-                        ManagementBaseObject newIP =
-                          objMO.GetMethodParameters("EnableStatic");
+                        try
+                        {
+                            ManagementBaseObject setIP;
+                            ManagementBaseObject newIP = objMO.GetMethodParameters("EnableStatic");
 
-                        newIP["IPAddress"] = new string[] { ip_address };
-                        newIP["SubnetMask"] = new string[] { subnet_mask };
+                            newIP["IPAddress"] = new string[] { ip_address };
+                            newIP["SubnetMask"] = new string[] { subnet_mask };
 
-                        setIP = objMO.InvokeMethod("EnableStatic", newIP, null);
+
+                            ManagementBaseObject objNewGate = null;
+                            objNewGate = objMO.GetMethodParameters("SetGateways");
+                            //Set DefaultGateway
+                            objNewGate["DefaultIPGateway"] = gateways;
+                            objNewGate["GatewayCostMetric"] = new int[] { 1 };
+
+
+                            setIP = objMO.InvokeMethod("EnableStatic", newIP, null);
+                            setIP = objMO.InvokeMethod("SetGateways", objNewGate, null);
+
+                        }
+                        catch (Exception ex)
+                        {
+
+                        }
                     }
                 }
             }
@@ -243,7 +288,27 @@ namespace Bootlegger.App.Lib
             }
         }
 
-        public bool WiFiSettingsOk { get => false; }
+        public bool WiFiSettingsOk { get
+            {
+                ManagementClass objMC =
+              new ManagementClass("Win32_NetworkAdapterConfiguration");
+                ManagementObjectCollection objMOC = objMC.GetInstances();
+
+                foreach (ManagementObject objMO in objMOC)
+                {
+                    if ((bool)objMO["IPEnabled"])
+                    {
+                        var ip = (objMO["IPAddress"] as string[]);
+
+                        if (ip?[0]?.Equals("10.10.10.1") ?? false)
+                        {
+                            return true;
+                        }
+                    }
+                }
+                return false;
+            }
+        }
 
         public void OpenAdminPanel()
         {

@@ -1,4 +1,5 @@
 ﻿using Bootlegger.App.Lib;
+using MahApps.Metro.Controls;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -44,8 +45,6 @@ namespace Bootlegger.App.Win
             {
                 progress.Content = "Problem starting application!";
             }
-
-           
         }
 
         private void BootleggerApp_OnLog(string obj)
@@ -86,9 +85,20 @@ namespace Bootlegger.App.Win
 
         private async void restorebtn_Click(object sender, RoutedEventArgs e)
         {
-            restorebtn.IsEnabled = false;
-            await App.BootleggerApp.RestoreDatabase();
-            restorebtn.IsEnabled = true;
+            var diag = new Avalon.Windows.Dialogs.FolderBrowserDialog() { BrowseFiles = false };
+            var folder = diag.ShowDialog();
+
+            if (diag.SelectedPath != null)
+            {
+                restorebtn.IsEnabled = false;
+                await App.BootleggerApp.RestoreDatabase(diag.SelectedPath);
+                restorebtn.IsEnabled = true;
+            }
+        }
+
+        private void Button_Click(object sender, RoutedEventArgs e)
+        {
+            (App.Current.MainWindow as MetroWindow).Close();
         }
     }
 }
