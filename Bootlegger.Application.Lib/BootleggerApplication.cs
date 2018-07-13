@@ -180,6 +180,48 @@ namespace Bootlegger.App.Lib
             System.Diagnostics.Process.Start(DockerLink);
         }
 
+        public void UnConfigureNetwork()
+        {
+            ManagementClass objMC =
+              new ManagementClass("Win32_NetworkAdapterConfiguration");
+            ManagementObjectCollection objMOC = objMC.GetInstances();
+
+            foreach (ManagementObject objMO in objMOC)
+            {
+                if ((bool)objMO["IPEnabled"])
+                {
+                    var gateways = (objMO["DefaultIPGateway"] as string[]);
+                    var gateway = gateways?[0];
+
+                    if (gateway?.StartsWith("10.10.10") ?? false)
+                    {
+                        try
+                        {
+                            //ManagementBaseObject setIP;
+                            //ManagementBaseObject newIP = objMO.GetMethodParameters("EnableDHCP");
+
+                            //newIP["IPAddress"] = new string[] { ip_address };
+                            //newIP["SubnetMask"] = new string[] { subnet_mask };
+
+
+                            //ManagementBaseObject objNewGate = null;
+                            //objNewGate = objMO.GetMethodParameters("SetGateways");
+                            //Set DefaultGateway
+                            //objNewGate["DefaultIPGateway"] = gateways;
+                            //objNewGate["GatewayCostMetric"] = new int[] { 1 };
+
+                            objMO.InvokeMethod("EnableDHCP", null);
+                            //setIP = objMO.InvokeMethod("SetGateways", objNewGate, null);
+                        }
+                        catch (Exception ex)
+                        {
+
+                        }
+                    }
+                }
+            }
+        }
+
         public void ConfigureNetwork(string ip_address, string subnet_mask)
         {
             ManagementClass objMC =

@@ -60,6 +60,7 @@ namespace Bootlegger.App.Win
                     closing = true;
                     _mainFrame.Visibility = Visibility.Collapsed;
                     progress.Visibility = Visibility.Visible;
+                    App.BootleggerApp.UnConfigureNetwork();
                     await App.BootleggerApp.StopServer();
                     canexit = true;
                     closing = false;
