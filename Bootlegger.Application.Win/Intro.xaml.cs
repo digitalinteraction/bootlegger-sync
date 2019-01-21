@@ -29,19 +29,19 @@ namespace Bootlegger.App.Win
 
         private void Continuebtn_Click(object sender, RoutedEventArgs e)
         {
-            switch(App.BootleggerApp.CurrentState)
-            {
-                case Lib.BootleggerApplication.RUNNING_STATE.NO_DOCKER:
-                case Lib.BootleggerApplication.RUNNING_STATE.NO_DOCKER_RUNNING:
-                    (Application.Current.MainWindow as MainWindow)._mainFrame.Content = new InstallDocker();
-                    break;
-                case Lib.BootleggerApplication.RUNNING_STATE.NO_IMAGES:
-                    (Application.Current.MainWindow as MainWindow)._mainFrame.Content = new DownloadImages();
-                    break;
-                case Lib.BootleggerApplication.RUNNING_STATE.READY:
-                    (Application.Current.MainWindow as MainWindow)._mainFrame.Content = new Running();
-                    break;
-            }
+            //switch(App.BootleggerApp.CurrentState)
+            //{
+            //    case Lib.BootleggerApplication.RUNNING_STATE.NO_DOCKER:
+            //    case Lib.BootleggerApplication.RUNNING_STATE.NO_DOCKER_RUNNING:
+            (Application.Current.MainWindow as MainWindow)._mainFrame.Content = new Install();
+            //        break;
+            //    case Lib.BootleggerApplication.RUNNING_STATE.NO_IMAGES:
+            //        (Application.Current.MainWindow as MainWindow)._mainFrame.Content = new DownloadImages();
+            //        break;
+            //    case Lib.BootleggerApplication.RUNNING_STATE.READY:
+            //        (Application.Current.MainWindow as MainWindow)._mainFrame.Content = new Running();
+            //        break;
+            //}
 
         }
     }

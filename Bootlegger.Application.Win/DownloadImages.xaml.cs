@@ -133,7 +133,7 @@ namespace Bootlegger.App.Win
         private void continuebtn_Copy_Click(object sender, RoutedEventArgs e)
         {
             cancel.Cancel();
-            (Application.Current.MainWindow as MainWindow)._mainFrame.Content = new Checklist();
+            (Application.Current.MainWindow as MainWindow)._mainFrame.Content = new WiFiCheck();
         }
     }
 }

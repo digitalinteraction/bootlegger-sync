@@ -67,59 +67,30 @@ namespace Bootlegger.App.Win
                     Close();
                 }
             }
-
-
-            //if (!canexit)
-            //{
-                
-            //}
-            //else
-            //{
-                
-            //    //App.BootleggerApp.StopWifi();
-            //}
         }
 
         private async void MainWindow_Initialized(object sender, EventArgs e)
         {
-            //show progress...
-            progress.Visibility = Visibility.Visible;
-            try
-            {
-                await App.BootleggerApp.Start();
-            }
-            catch
-            {
-                await (App.Current.MainWindow as MetroWindow).ShowMessageAsync("Message", "The connection to Docker has timed out, please restart docker manually.");
-                //MessageBox.Show("The connection to Docker has timed out, please restart docker manually.");
-                Environment.Exit(1);
-            }
             progress.Visibility = Visibility.Hidden;
 
+            //HACK FOR DEGUB
+            App.BootleggerApp.IsInstalled = false; 
 
-            //await App.BootleggerApp.DownloadImages(false,new CancellationTokenSource().Token);
-
-            //App.BootleggerApp.CurrentState = Lib.BootleggerApplication.RUNNING_STATE.NOT_SUPPORTED;
-
-            switch (App.BootleggerApp.CurrentState)
+            if (App.BootleggerApp.IsInstalled)
             {
-                case Lib.BootleggerApplication.RUNNING_STATE.NOT_SUPPORTED:
-                case Lib.BootleggerApplication.RUNNING_STATE.NO_DOCKER:
-                case Lib.BootleggerApplication.RUNNING_STATE.NO_IMAGES:
-                case Lib.BootleggerApplication.RUNNING_STATE.NO_DOCKER_RUNNING:
-                case Lib.BootleggerApplication.RUNNING_STATE.NOWIFICONFIG:
-                    _mainFrame.Content = new Checklist();
-                    break;
-                case Lib.BootleggerApplication.RUNNING_STATE.READY:
-                    //show status (logs, window to open, location of directory of videos)
-                    //_mainFrame.Content = new DownloadImages();
+                if (App.BootleggerApp.WiFiSettingsOk)
+                {
                     _mainFrame.Content = new Running();
-                    break;
+                }
+                else
+                {
+                    _mainFrame.Content = new WiFiCheck();
+                }
             }
-
-
-
-            
+            else
+            {
+                _mainFrame.Content = new Install();
+            }
         }
 
         private void Button_Click(object sender, RoutedEventArgs e)

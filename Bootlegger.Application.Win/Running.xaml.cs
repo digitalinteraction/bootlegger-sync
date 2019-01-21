@@ -5,6 +5,7 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using System.Text.RegularExpressions;
+using System.Threading;
 using System.Threading.Tasks;
 using System.Windows;
 using System.Windows.Controls;
@@ -27,17 +28,23 @@ namespace Bootlegger.App.Win
         {
             InitializeComponent();
             Loaded += Running_Loaded;
+            Unloaded += Running_Unloaded;
+
         }
+
+        private void Running_Unloaded(object sender, RoutedEventArgs e)
+        {
+            cts.Cancel();
+        }
+
+        CancellationTokenSource cts = new CancellationTokenSource();
 
         private async void Running_Loaded(object sender, RoutedEventArgs e)
         {
             App.BootleggerApp.OnLog += BootleggerApp_OnLog;
             progress.Content = "Starting application...";
-            //App.BootleggerApp.CreateWiFi("bootlegger","coolshot");
-            //ssid.Content = $"http://{BootleggerApplication.GetLocalIPAddress()}";
-            //ssid.Content = "SSID: bootlegger";
-            //pwd.Content = "";
-            if (await App.BootleggerApp.RunServer())
+
+            if (await App.BootleggerApp.RunServer(cts.Token))
             {
                 progress.Content = "Running";
             }

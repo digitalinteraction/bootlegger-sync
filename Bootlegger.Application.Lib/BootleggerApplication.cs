@@ -2,7 +2,6 @@
 using Docker.DotNet.Models;
 using MongoDB.Bson;
 using MongoDB.Driver;
-using Rssdp;
 using System;
 using System.Collections.Generic;
 using System.Diagnostics;
@@ -15,14 +14,16 @@ using System.Threading;
 using System.Threading.Tasks;
 using YamlDotNet.RepresentationModel;
 using System.Management;
+using System.Linq;
+using Flurl.Http;
 
 namespace Bootlegger.App.Lib
 {
-    public class BootleggerApplication:IProgress<JSONMessage>
+    public class BootleggerApplication : IProgress<JSONMessage>
     {
-        public enum RUNNING_STATE { NOT_SUPPORTED, NO_DOCKER, NO_DOCKER_RUNNING, NO_IMAGES, READY, RUNNING,
-            NOWIFICONFIG
-        }
+        public enum INSTALL_STATE { NOT_SUPPORTED, NEED_DOWNLOAD, NEED_IMAGES, INSTALLED }
+
+        public enum RUNNING_STATE { READY, RUNNING, NOWIFICONFIG }
 
         public RUNNING_STATE CurrentState { get; private set; }
         public OperatingSystem CurrentPlatform { get; private set; }
@@ -34,24 +35,165 @@ namespace Bootlegger.App.Lib
 
         Docker.DotNet.DockerClient dockerclient;
 
-        private SsdpDevicePublisher _Publisher;
+        //private SsdpDevicePublisher _Publisher;
 
-        public static string GetLocalIPAddress()
+        #region Installer
+        
+        public bool IsInstalled
         {
-            //return Dns.GetHostName();
+            get
+            {
+                return Plugin.Settings.CrossSettings.Current.GetValueOrDefault("ourstory_installed", false);
+                //return Xamarin.Essentials.Preferences.Get("ourstory.installed", false);
+            }
 
-            return "10.10.10.1";
-
-            //var host = Dns.GetHostEntry(Dns.GetHostName());
-            //foreach (var ip in host.AddressList)
-            //{
-            //    if (ip.AddressFamily == AddressFamily.InterNetwork)
-            //    {
-            //        return ip.ToString();
-            //    }
-            //}
-            //throw new Exception("Local IP Address Not Found!");
+            set
+            {
+                Plugin.Settings.CrossSettings.Current.AddOrUpdateValue("ourstory_installed", value);
+            }
         }
+
+        public bool IsDockerInstalled
+        {
+            get
+            {
+                switch (CurrentInstallerType)
+                {
+                    case InstallerType.NO_HYPER_V:
+                        return false;
+                    case InstallerType.HYPER_V:
+                    default:
+                        return File.Exists(@"C:\Program Files\Docker\Docker\Docker for Windows.exe");
+                }
+            }
+        }
+
+        public bool HasCachedContent
+        {
+            get
+            {
+                string installer = (CurrentInstallerType == InstallerType.HYPER_V) ? HYPER_V_INSTALLER_LOCAL : INSTALLER_LOCAL;
+                return
+                    File.Exists(Path.Combine("downloads", installer)) && File.Exists(Path.Combine("downloads", "images.tar"));
+            }
+        }
+
+        public bool IsOnlineInstaller { get {
+                return Plugin.Connectivity.CrossConnectivity.Current.IsConnected && Plugin.Connectivity.CrossConnectivity.Current.ConnectionTypes.Contains(Plugin.Connectivity.Abstractions.ConnectionType.WiFi);
+            }
+        }
+
+        InstallerType CurrentInstallerType { get {
+            return (!HyperVSwitch.SafeNativeMethods.IsProcessorFeaturePresent(HyperVSwitch.ProcessorFeature.PF_VIRT_FIRMWARE_ENABLED))?InstallerType.HYPER_V : InstallerType.NO_HYPER_V;
+        } }
+
+        //download the content:
+        const string HYPER_V_INSTALLER_REMOTE = "https://download.docker.com/win/stable/Docker%20for%20Windows%20Installer.exe";
+        const string HYPER_V_INSTALLER_LOCAL = "DockerForWindows.exe";
+        const string INSTALLER_REMOTE = "https://github.com/docker/toolbox/releases/download/v18.09.1/DockerToolbox-18.09.1.exe";
+        const string INSTALLER_LOCAL = "DockerToolbox.exe";
+
+        enum InstallerType { HYPER_V, NO_HYPER_V };
+
+        public async Task DownloadInstaller(CancellationToken cancel)
+        {
+            string src = "";
+            string dst = "";
+            switch (CurrentInstallerType)
+            {
+                case InstallerType.HYPER_V:
+                    src = HYPER_V_INSTALLER_REMOTE;
+                    dst = $"{HYPER_V_INSTALLER_LOCAL}";
+                    break;
+
+                case InstallerType.NO_HYPER_V:
+                    src = INSTALLER_REMOTE;
+                    dst = $"{INSTALLER_LOCAL}";
+                    break;
+            }
+
+            if (!File.Exists(Path.Combine("downloads",dst)))
+            {
+                await DownloadFileInBackground(src,Path.Combine("downloads",dst + ".download"),cancel);
+                File.Move(Path.Combine("downloads", dst + ".download"), Path.Combine("downloads", dst));
+            }
+        }
+
+        public event Action<DownloadProgressChangedEventArgs> OnFileDownloadProgress;
+
+        public async Task DownloadFileInBackground(string src,string dst, CancellationToken cancel)
+        {
+            WebClient client = new WebClient();
+            cancel.Register(client.CancelAsync);
+            Uri uri = new Uri(src);
+
+            // Specify that the DownloadFileCallback method gets called
+            // when the download completes.
+            //client.DownloadFileCompleted += new AsyncCompletedEventHandler(DownloadFileCallback2);
+            // Specify a progress notification handler.
+            client.DownloadProgressChanged += (o,e) =>
+            {
+                OnFileDownloadProgress?.Invoke(e);
+            };
+            await client.DownloadFileTaskAsync(uri, dst);
+        }
+
+        static Task<int> RunProcessAsync(string fileName)
+        {
+            var tcs = new TaskCompletionSource<int>();
+
+            var process = new Process
+            {
+                StartInfo = { FileName = fileName },
+                EnableRaisingEvents = true
+            };
+
+            process.Exited += (sender, args) =>
+            {
+                tcs.SetResult(process.ExitCode);
+                process.Dispose();
+            };
+
+            process.Start();
+
+            return tcs.Task;
+        }
+
+        public async Task RunInstaller(CancellationToken cancel)
+        {
+            string args = "";
+            switch (CurrentInstallerType)
+            {
+                case InstallerType.HYPER_V:
+                    args = $"downloads/{HYPER_V_INSTALLER_LOCAL} install --quiet";
+                    break;
+
+                case InstallerType.NO_HYPER_V:
+                    args = $"downloads/{INSTALLER_LOCAL} /SP- /SILENT /SUPPRESSMSGBOXES /NORESTART";
+                    break;
+            }
+
+            await RunProcessAsync(args);
+        }
+
+        #endregion
+
+        //public static string GetLocalIPAddress()
+        //{
+        //    //return Dns.GetHostName();
+
+        //    return "10.10.10.1";
+
+        //    //var host = Dns.GetHostEntry(Dns.GetHostName());
+        //    //foreach (var ip in host.AddressList)
+        //    //{
+        //    //    if (ip.AddressFamily == AddressFamily.InterNetwork)
+        //    //    {
+        //    //        return ip.ToString();
+        //    //    }
+        //    //}
+        //    //throw new Exception("Local IP Address Not Found!");
+        //}
 
         async Task StartDockerClient()
         {
@@ -67,79 +209,37 @@ namespace Bootlegger.App.Lib
             });
         }
 
-        public async Task Start()
-        {
-            _Publisher = new SsdpDevicePublisher();
-            var deviceDefinition = new SsdpRootDevice()
-            {
-                CacheLifetime = TimeSpan.FromMinutes(30), //How long SSDP clients can cache this info.
-                Location = new Uri("http://"+ GetLocalIPAddress()), // Must point to the URL that serves your devices UPnP description document. 
-                DeviceTypeNamespace = "bootlegger",
-                DeviceType = "server",
-                DeviceVersion = 1,
-                FriendlyName = "Bootlegger Server",
-                Manufacturer = "Newcastle University",
-                ModelName = "Serverv1",
-                Uuid = "30f4d4fe-59e6-11e8-9c2d-fa7ae01bbebc" // This must be a globally unique value that survives reboots etc. Get from storage or embedded hardware etc.
-            };
-            _Publisher.NotificationBroadcastInterval = TimeSpan.FromSeconds(10);
-            _Publisher.AddDevice(deviceDefinition);
-            _Publisher.StandardsMode = SsdpStandardsMode.Relaxed;
+        //public async Task Start()
+        //{
+        //    await StartDockerClient();
+        //}
 
-            if (CurrentPlatform.Platform == PlatformID.Win32Windows || CurrentPlatform.Platform == PlatformID.Unix)
-            {
-                CurrentState = RUNNING_STATE.NOT_SUPPORTED;
-                return;
-            }
-
-            /////FOR DEBUG
-            
-
-
-            try
-            { 
-                await CheckDocker();
-            }
-            catch (Exception e)
-            {
-                CurrentState = RUNNING_STATE.NO_DOCKER;
-            }
-
-            //CurrentState = RUNNING_STATE.NO_DOCKER;
-
-            //CurrentState = RUNNING_STATE.NO_DOCKER;
-            //return;
-
-            await StartDockerClient();
-            
-
-            if (CurrentState == RUNNING_STATE.NO_IMAGES)
-            {
+        //if (CurrentState == RUNNING_STATE.NO_IMAGES)
+        //    {
                 
-                Task containers = dockerclient.Containers.ListContainersAsync(new Docker.DotNet.Models.ContainersListParameters() { All = true });
-                if (await Task.WhenAny(containers, Task.Delay(10000)) == containers)
-                {
-                    //containers installed?
-                    try
-                    {
-                        var exists = await dockerclient.Images.InspectImageAsync("bootlegger/server-app");
-                        if (WiFiSettingsOk)
-                            CurrentState = RUNNING_STATE.READY;
-                        else
-                            CurrentState = RUNNING_STATE.NOWIFICONFIG;
-                    }
-                    catch (Exception e)
-                    {
-                        CurrentState = RUNNING_STATE.NO_IMAGES;
-                    }
-                }
-                else
-                {
-                    // timeout logic
-                    CurrentState = RUNNING_STATE.NO_DOCKER_RUNNING;
-                }                
-            }
-        }
+        //        Task containers = dockerclient.Containers.ListContainersAsync(new Docker.DotNet.Models.ContainersListParameters() { All = true });
+        //        if (await Task.WhenAny(containers, Task.Delay(10000)) == containers)
+        //        {
+        //            //containers installed?
+        //            try
+        //            {
+        //                var exists = await dockerclient.Images.InspectImageAsync("bootlegger/server-app");
+        //                if (WiFiSettingsOk)
+        //                    CurrentState = RUNNING_STATE.READY;
+        //                else
+        //                    CurrentState = RUNNING_STATE.NOWIFICONFIG;
+        //            }
+        //            catch (Exception e)
+        //            {
+        //                CurrentState = RUNNING_STATE.NO_IMAGES;
+        //            }
+        //        }
+        //        else
+        //        {
+        //            // timeout logic
+        //            CurrentState = RUNNING_STATE.NO_DOCKER_RUNNING;
+        //        }                
+        //    }
 
         internal async Task RestoreDatabase(string pathtofiles)
         {
@@ -147,9 +247,6 @@ namespace Bootlegger.App.Lib
             var client = new MongoClient("mongodb://localhost:27017");
             var database = client.GetDatabase("bootlegger");
             var files = Directory.GetFiles(pathtofiles);
-
-            
-
 
             foreach (var file in files)
             {
@@ -174,11 +271,7 @@ namespace Bootlegger.App.Lib
                 var result = await table.BulkWriteAsync(operations);
             }
         }
-
-        internal void OpenDownloadLink()
-        {
-            System.Diagnostics.Process.Start(DockerLink);
-        }
+        
 
         public void UnConfigureNetwork()
         {
@@ -270,6 +363,12 @@ namespace Bootlegger.App.Lib
         {
             await Task.Run(() =>
             {
+
+                //check if docker machine is running...
+
+
+                Process.Start(@"C:\Program Files\Docker\Docker\Docker for Windows.exe").WaitForExit();
+
                 Process p = new Process();
                 p.StartInfo = new ProcessStartInfo()
                 {
@@ -297,12 +396,12 @@ namespace Bootlegger.App.Lib
                 };
                 p.Start();
                 p.WaitForExit();
+
+
                 if (p.ExitCode == 0)
-                    CurrentState = RUNNING_STATE.NO_IMAGES;
+                    throw new NoImagesException();
                 else
-                {
-                    CurrentState = RUNNING_STATE.NO_DOCKER_RUNNING;
-                }
+                    throw new DockerNotRunningException();
             });
         }
 
@@ -310,25 +409,7 @@ namespace Bootlegger.App.Lib
         {
             System.Diagnostics.Process.Start(Directory.GetCurrentDirectory() + Path.DirectorySeparatorChar + "upload");
         }
-
-        public string DockerLink
-        {
-            get
-            {
-                switch (CurrentPlatform.Platform)
-                {
-                    case PlatformID.Win32NT:
-                        if (Environment.Version.Major >= 10)
-                            return "https://download.docker.com/win/stable/Docker%20for%20Windows%20Installer.exe";
-                        else
-                            return "https://download.docker.com/win/stable/DockerToolbox.exe";
-                    case PlatformID.MacOSX:
-                        return "https://store.docker.com/editions/community/docker-ce-desktop-mac";
-                    default:
-                        return "https://store.docker.com";
-                }
-            }
-        }
+        
 
         public bool WiFiSettingsOk { get
             {
@@ -359,7 +440,7 @@ namespace Bootlegger.App.Lib
 
         public void OpenDocs()
         {
-            System.Diagnostics.Process.Start("https://standalone.ourstory.video");
+            System.Diagnostics.Process.Start("https://guide.ourstory.video");
         }
 
 
@@ -398,11 +479,11 @@ namespace Bootlegger.App.Lib
             if (!forceupdate)
             {
                 //check if the local version of the images exists:
-                if (File.Exists("images.tar"))
+                if (File.Exists(Path.Combine("downloads","images.tar")))
                 {
                     doonline = false;
-                    await dockerclient.Images.LoadImageAsync(new ImageLoadParameters(), File.OpenRead("images.tar"),this,cancel);
-                    OnNextDownload(1, 1, 1);
+                    await dockerclient.Images.LoadImageAsync(new ImageLoadParameters(), File.OpenRead(Path.Combine("downloads","images.tar")),this,cancel);
+                    OnNextDownload?.Invoke(1, 1, 1);
                 }
             }
 
@@ -467,7 +548,7 @@ namespace Bootlegger.App.Lib
                         finally
                         {
                             CurrentDownload++;
-                            OnNextDownload(CurrentDownload, imagestodownload.Count, CurrentDownload / (double)imagestodownload.Count);
+                            OnNextDownload?.Invoke(CurrentDownload, imagestodownload.Count, CurrentDownload / (double)imagestodownload.Count);
                         }
                     }
                     else
@@ -481,10 +562,16 @@ namespace Bootlegger.App.Lib
         Process currentProcess;
 
         //start containers...
-        public async Task<bool> RunServer()
+        public async Task<bool> RunServer(CancellationToken cancel)
         {
             try
             {
+                //TODO: Start Docker
+                await StartDocker(cancel);
+
+                //TODO: Start Docker Client
+                await StartDockerClient();
+
 
                 if (currentProcess != null && !currentProcess.HasExited)
                 {
@@ -495,7 +582,7 @@ namespace Bootlegger.App.Lib
                 currentProcess.StartInfo = new ProcessStartInfo("docker-compose");
                 currentProcess.StartInfo.WorkingDirectory = Directory.GetCurrentDirectory();
                 currentProcess.StartInfo.Arguments = "-p bootleggerlocal up -d";
-                currentProcess.StartInfo.Environment.Add("MYIP", GetLocalIPAddress());
+                //currentProcess.StartInfo.Environment.Add("MYIP", GetLocalIPAddress());
                 currentProcess.StartInfo.UseShellExecute = false;
                 currentProcess.StartInfo.CreateNoWindow = true;
                 currentProcess.StartInfo.RedirectStandardOutput = true;
@@ -552,6 +639,57 @@ namespace Bootlegger.App.Lib
             }
         }
 
+        public async Task StartDocker(CancellationToken cancel)
+        {
+            switch (CurrentInstallerType)
+            {
+                case InstallerType.HYPER_V:
+                    Process.Start(@"C:\Program Files\Docker\Docker\Docker for Windows.exe");
+                    //await RunProcessAsync(@"C:\Program Files\Docker\Docker\Docker for Windows.exe");
+
+                    //wait until docker actually started...
+                    var task = Task.Factory.StartNew(() =>
+                    {
+                        bool found = false;
+                        while (!found)
+                        {
+                            try
+                            {
+                                var p = new Process();
+                                p.StartInfo = new ProcessStartInfo()
+                                {
+                                    FileName = "docker",
+                                    Arguments = "info",
+                                    WindowStyle = ProcessWindowStyle.Hidden
+                                };
+                                p.Start();
+                                p.WaitForExit(2000);
+                                if (p.ExitCode == 0)
+                                    found = true;
+                            }
+                            catch (Exception e) {
+                                Console.WriteLine(e.Message);
+                            }
+                            Thread.Sleep(5000);
+                        }
+                    });
+
+                    if (await Task.WhenAny(task, Task.Delay(TimeSpan.FromMinutes(4), cancel)) == task)
+                    {
+                        await task;
+                    }
+                    else
+                    {
+                        throw new TimeoutException();
+                    }
+                    break;
+
+                case InstallerType.NO_HYPER_V:
+                    //await RunProcessAsync(@"C:\Program Files\Git\bin\bash.exe" --login -i "C:\Program Files\Docker Toolbox\start.sh");
+                    break;
+            }
+        }
+
         public async Task<bool> LiveServerCheck()
         {
             WebClient client = new WebClient();
@@ -562,7 +700,7 @@ namespace Bootlegger.App.Lib
             {
                 try
                 {
-                    var result = await client.DownloadStringTaskAsync($"http://{GetLocalIPAddress()}/status");
+                    var result = await client.DownloadStringTaskAsync($"http://10.10.10.1/status");
                     connected = true;
                 }
                 catch
@@ -586,7 +724,6 @@ namespace Bootlegger.App.Lib
                 currentProcess.Close();
             }
             
-
             try
             {
                 currentProcess = new Process();
@@ -604,6 +741,9 @@ namespace Bootlegger.App.Lib
             {
                 //cant stop?
             }
+
+            //stop docker??
+
         }
 
         //message, current, total, sub, overall
@@ -615,7 +755,7 @@ namespace Bootlegger.App.Lib
         public void Report(JSONMessage value)
         {
             //Debug.WriteLine(value.From);
-
+            
             //Debug.WriteLine(value.Status);
             //Debug.WriteLine(value.ProgressMessage);
             if (value.ProgressMessage != null)

@@ -7,28 +7,22 @@ volumes:
     external: false
 
 services:
-  nginx:
-    image: nginx:alpine
-    restart: always
+  nginx-local:
+    image: bootlegger/nginx-local
     ports:
       - "80:80"
     volumes:
-      - "./server.conf:/etc/nginx/conf.d/default.conf:ro"
-      - "./bootlegger.conf:/etc/nginx/vhost.d/default:ro"
-      - "/usr/share/nginx/html"
       - "./upload:/usr/src/app/upload"
     volumes_from:
       - web
 
   redis:
-    restart: always
     image: redis:alpine
     command: redis-server --appendonly yes
     volumes:
       - redis-data:/data
 
   mongo:
-    restart: always
     image: mvertes/alpine-mongo
     ports:
       - "27017:27017"
@@ -36,32 +30,20 @@ services:
       - mongo-data:/data/db
 
   beanstalk:
-    restart: always
     image: kusmierz/beanstalkd
 
   worker:
-    image: bootlegger/transcode-server:latest
-    restart: always
+    image: bootlegger/ourstory-worker:latest
     volumes_from:
       - web
-    environment:
-      - MYIP=10.10.10.1
     volumes:
-      - "./worker.js:/usr/src/app/config/local.js:ro"
       - "./upload:/usr/src/app/upload"
-      - "/.tmp/"
 
   web:
-    restart: always
-    image: bootlegger/server-app:latest
+    image: bootlegger/ourstory-server:latest
     depends_on: 
       - redis
       - mongo
       - beanstalk
-    expose:
-      - 1337
     volumes:
-      - "./config.js:/usr/src/app/config/local.js:ro"
       - "./upload:/usr/src/app/upload"
-    environment:
-      - MYIP=10.10.10.1

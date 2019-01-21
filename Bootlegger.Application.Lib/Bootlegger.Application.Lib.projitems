@@ -10,26 +10,25 @@
   </PropertyGroup>
   <ItemGroup>
     <Compile Include="$(MSBuildThisFileDirectory)BootleggerApplication.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)DockerNotRunningException.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)NoImagesException.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)SafeNativeMethods.cs" />
   </ItemGroup>
   <ItemGroup>
-    <None Include="$(MSBuildThisFileDirectory)config.js">
+    <Content Include="$(MSBuildThisFileDirectory)docker-compose.yml">
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+    </Content>
+    <None Include="$(MSBuildThisFileDirectory)downloads\DockerForWindows.exe">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </None>
-    <None Include="$(MSBuildThisFileDirectory)docker-compose.yml">
+    <None Include="$(MSBuildThisFileDirectory)downloads\DockerToolbox.exe">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </None>
-    <None Include="$(MSBuildThisFileDirectory)images\getimages.cmd" />
+    <None Include="$(MSBuildThisFileDirectory)downloads\getimages.cmd" />
+    <None Include="$(MSBuildThisFileDirectory)downloads\getinstallers.ps1" />
+    <None Include="$(MSBuildThisFileDirectory)downloads\images.tar">
+      <CopyToOutputDirectory>Never</CopyToOutputDirectory>
+    </None>
     <None Include="$(MSBuildThisFileDirectory)README.md" />
-    <None Include="$(MSBuildThisFileDirectory)server.conf">
-      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
-    </None>
-    <None Include="$(MSBuildThisFileDirectory)worker.js">
-      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
-    </None>
-  </ItemGroup>
-  <ItemGroup>
-    <None Include="$(MSBuildThisFileDirectory)bootlegger.conf">
-      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
-    </None>
   </ItemGroup>
 </Project>

@@ -15,8 +15,8 @@
         </Grid>
         <StackPanel Margin="20" Orientation="Vertical">
             <Label Padding="0" Content="Welcome to Our Story" Height="60" VerticalAlignment="Top" FontFamily="Segoe UI Light" FontSize="36"/>
-            <TextBlock HorizontalAlignment="Left" TextWrapping="Wrap" VerticalAlignment="Top" Foreground="#FFA4A4A4" FontFamily="Segoe UI Light" Height="84" Width="360" FontSize="18"><Run Text="Running "/><Run Text="Our Story "/><Run Text="locally requires "/><Run Text="additional"/><Run Text=" software to be downloaded. "/><Run Text="Make "/><Run Text="sure you are connected to WiFi before continuing..."/><Run Text=" "/></TextBlock>
-            <Image Margin="0,40,0,0" Source="logo_white.png" HorizontalAlignment="Center" Height="60"/>
+            <TextBlock HorizontalAlignment="Left" TextWrapping="Wrap" VerticalAlignment="Top" Foreground="#FFA4A4A4" FontFamily="Segoe UI Light" Height="84" Width="360" FontSize="18"><Run Text="Running "/><Run Text="Our Story "/><Run Text="Titan may"/><Run Text=" require "/><Run Text="additional"/><Run Text=" software to be downloaded. "/><Run Text="Make "/><Run Text="sure you are connected to WiFi before continuing..."/><Run Text=" "/></TextBlock>
+            <!--<Image Margin="0,40,0,0" Source="logo_white.png" HorizontalAlignment="Center" Height="60"/>-->
 
         </StackPanel>
 

@@ -10,7 +10,7 @@
         BorderThickness="1"
         WindowStartupLocation="CenterScreen"
         WindowTitleBrush="Transparent"
-        Title="Our Story Standalone" Height="400" Width="600" ResizeMode="CanMinimize" IsMaxRestoreButtonEnabled="False">
+        Title="Our Story Titan" Height="400" Width="600" ResizeMode="CanMinimize" IsMaxRestoreButtonEnabled="False">
     <Controls:MetroWindow.RightWindowCommands>
         <Controls:WindowCommands>
             <Button Content="Documentation" Click="Button_Click" />
