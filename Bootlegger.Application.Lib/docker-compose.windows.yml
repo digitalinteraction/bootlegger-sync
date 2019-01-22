@@ -34,6 +34,9 @@ services:
 
   worker:
     image: bootlegger/ourstory-worker:latest
+    depends_on:
+      - mongo
+      - beanstalk
     volumes_from:
       - web
     volumes:

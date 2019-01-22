@@ -47,10 +47,12 @@ namespace Bootlegger.App.Win
             if (await App.BootleggerApp.RunServer(cts.Token))
             {
                 progress.Content = "Running";
+                progressring.Visibility = Visibility.Collapsed;
             }
             else
             {
                 progress.Content = "Problem starting application!";
+                progressring.Visibility = Visibility.Collapsed;
             }
         }
 

@@ -70,6 +70,8 @@ namespace Bootlegger.App.Win
 
                 status.Text = "Starting Docker...";
 
+                progress.IsIndeterminate = true;
+
                 await App.BootleggerApp.StartDocker(cancel.Token);
 
                 status.Text = "Getting Our Story Components...";
@@ -80,7 +82,7 @@ namespace Bootlegger.App.Win
 
                 App.BootleggerApp.IsInstalled = true;
 
-                (Application.Current.MainWindow as MainWindow)._mainFrame.Content = new Running();
+                (Application.Current.MainWindow as MainWindow)._mainFrame.Content = new WiFiCheck();
             }
             catch (Exception ex)
             {

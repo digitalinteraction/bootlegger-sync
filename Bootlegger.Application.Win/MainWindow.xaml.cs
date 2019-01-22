@@ -74,7 +74,7 @@ namespace Bootlegger.App.Win
             progress.Visibility = Visibility.Hidden;
 
             //HACK FOR DEGUB
-            App.BootleggerApp.IsInstalled = false; 
+            //App.BootleggerApp.IsInstalled = false; 
 
             if (App.BootleggerApp.IsInstalled)
             {

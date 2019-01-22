@@ -15,7 +15,14 @@ using System.Threading.Tasks;
 using YamlDotNet.RepresentationModel;
 using System.Management;
 using System.Linq;
-using Flurl.Http;
+using Docker.DotNet.X509;
+using System.Security.Cryptography.X509Certificates;
+using CertificatesToDBandBack;
+using System.Security.Cryptography;
+using Ductus.FluentDocker.Services;
+using Ductus.FluentDocker.Builders;
+using Ductus.FluentDocker.Commands;
+using System.Security.AccessControl;
 
 namespace Bootlegger.App.Lib
 {
@@ -60,7 +67,7 @@ namespace Bootlegger.App.Lib
                 switch (CurrentInstallerType)
                 {
                     case InstallerType.NO_HYPER_V:
-                        return false;
+                        return File.Exists(@"C:\Program Files\Docker Toolbox\docker.exe");
                     case InstallerType.HYPER_V:
                     default:
                         return File.Exists(@"C:\Program Files\Docker\Docker\Docker for Windows.exe");
@@ -138,13 +145,13 @@ namespace Bootlegger.App.Lib
             await client.DownloadFileTaskAsync(uri, dst);
         }
 
-        static Task<int> RunProcessAsync(string fileName)
+        static Task<int> RunProcessAsync(string fileName, string arg)
         {
             var tcs = new TaskCompletionSource<int>();
 
             var process = new Process
             {
-                StartInfo = { FileName = fileName },
+                StartInfo = { FileName = fileName, Arguments = arg },
                 EnableRaisingEvents = true
             };
 
@@ -162,84 +169,79 @@ namespace Bootlegger.App.Lib
         public async Task RunInstaller(CancellationToken cancel)
         {
             string args = "";
+            string file = "";
             switch (CurrentInstallerType)
             {
                 case InstallerType.HYPER_V:
-                    args = $"downloads/{HYPER_V_INSTALLER_LOCAL} install --quiet";
+                    file = Path.Combine(Environment.CurrentDirectory, "downloads", HYPER_V_INSTALLER_LOCAL);
+                    args = "install --quiet";
                     break;
 
                 case InstallerType.NO_HYPER_V:
-                    args = $"downloads/{INSTALLER_LOCAL} /SP- /SILENT /SUPPRESSMSGBOXES /NORESTART";
+                    file = Path.Combine(Environment.CurrentDirectory, "downloads", INSTALLER_LOCAL);
+                    args = "/SP- /SILENT /SUPPRESSMSGBOXES /NORESTART";
                     break;
             }
 
-            await RunProcessAsync(args);
+            await RunProcessAsync(file,args);
         }
 
         #endregion
 
-        //public static string GetLocalIPAddress()
-        //{
-        //    //return Dns.GetHostName();
-
-        //    return "10.10.10.1";
-
-        //    //var host = Dns.GetHostEntry(Dns.GetHostName());
-        //    //foreach (var ip in host.AddressList)
-        //    //{
-        //    //    if (ip.AddressFamily == AddressFamily.InterNetwork)
-        //    //    {
-        //    //        return ip.ToString();
-        //    //    }
-        //    //}
-        //    //throw new Exception("Local IP Address Not Found!");
-        //}
-
         async Task StartDockerClient()
         {
-            await Task.Run(() =>
+            await Task.Run(async () =>
             {
                 //start docker connection
-                switch (CurrentPlatform.Platform)
+                switch (CurrentInstallerType)
                 {
-                    case PlatformID.Win32NT:
+                    case InstallerType.HYPER_V:
                         dockerclient = new DockerClientConfiguration(new Uri("npipe://./pipe/docker_engine")).CreateClient();
+                        break;
+
+                    case InstallerType.NO_HYPER_V:
+
+                        var info = await Process.Start(new ProcessStartInfo("docker-machine", "env --shell=cmd")
+                        //var info = await Process.Start(new ProcessStartInfo("cmd.exe","/C @FOR / f \"tokens=*\" % i IN('docker-machine env') DO @% i")
+                        {
+                            //var info = await Process.Start(new ProcessStartInfo("whoami") {
+                            RedirectStandardError = true,
+                            RedirectStandardOutput = true,
+                            UseShellExecute = false,
+                            CreateNoWindow = true,
+                            WindowStyle = ProcessWindowStyle.Hidden
+                        }).StandardOutput.ReadToEndAsync();
+
+                        foreach (var line in info.Split('\n'))
+                        {
+                            if (line.Contains("="))
+                            {
+                                var parts = line.Split('=');
+                                Environment.SetEnvironmentVariable(parts[0].Remove(0, 4), parts[1]);
+                            }
+                        }
+
+                        var host = Environment.GetEnvironmentVariable("DOCKER_HOST");
+                        var path = Environment.GetEnvironmentVariable("DOCKER_CERT_PATH");
+
+                        byte[] certBuffer = Helpers.GetBytesFromPEM(File.ReadAllText(Path.Combine(path,"cert.pem")), PemStringType.Certificate);
+                        byte[] keyBuffer = Helpers.GetBytesFromPEM(File.ReadAllText(Path.Combine(path,"key.pem")), PemStringType.RsaPrivateKey);
+
+                        X509Certificate2 certificate = new X509Certificate2(certBuffer);
+
+                        RSACryptoServiceProvider prov = Crypto.DecodeRsaPrivateKey(keyBuffer);
+                        certificate.PrivateKey = prov;
+
+
+                        ServicePointManager.ServerCertificateValidationCallback += (o, c, ch, er) => true;
+
+                        var credentials = new CertificateCredentials(certificate);
+
+                        dockerclient = new DockerClientConfiguration(new Uri(host),credentials).CreateClient();
                         break;
                 }
             });
         }
-
-        //public async Task Start()
-        //{
-        //    await StartDockerClient();
-        //}
-
-        //if (CurrentState == RUNNING_STATE.NO_IMAGES)
-        //    {
-                
-        //        Task containers = dockerclient.Containers.ListContainersAsync(new Docker.DotNet.Models.ContainersListParameters() { All = true });
-        //        if (await Task.WhenAny(containers, Task.Delay(10000)) == containers)
-        //        {
-        //            //containers installed?
-        //            try
-        //            {
-        //                var exists = await dockerclient.Images.InspectImageAsync("bootlegger/server-app");
-        //                if (WiFiSettingsOk)
-        //                    CurrentState = RUNNING_STATE.READY;
-        //                else
-        //                    CurrentState = RUNNING_STATE.NOWIFICONFIG;
-        //            }
-        //            catch (Exception e)
-        //            {
-        //                CurrentState = RUNNING_STATE.NO_IMAGES;
-        //            }
-        //        }
-        //        else
-        //        {
-        //            // timeout logic
-        //            CurrentState = RUNNING_STATE.NO_DOCKER_RUNNING;
-        //        }                
-        //    }
 
         internal async Task RestoreDatabase(string pathtofiles)
         {
@@ -359,58 +361,21 @@ namespace Bootlegger.App.Lib
             }
         }
 
-        public async Task CheckDocker()
-        {
-            await Task.Run(() =>
-            {
-
-                //check if docker machine is running...
-
-
-                Process.Start(@"C:\Program Files\Docker\Docker\Docker for Windows.exe").WaitForExit();
-
-                Process p = new Process();
-                p.StartInfo = new ProcessStartInfo()
-                {
-                    FileName = "docker",
-                    WindowStyle = ProcessWindowStyle.Hidden
-                };
-                p.Start();
-                p.WaitForExit();
-
-                p = new Process();
-                p.StartInfo = new ProcessStartInfo()
-                {
-                    FileName = "docker-compose",
-                    WindowStyle = ProcessWindowStyle.Hidden
-                };
-                p.Start();
-                p.WaitForExit();
-
-                p = new Process();
-                p.StartInfo = new ProcessStartInfo()
-                {
-                    FileName = "docker",
-                    Arguments = "info",
-                    WindowStyle = ProcessWindowStyle.Hidden
-                };
-                p.Start();
-                p.WaitForExit();
-
-
-                if (p.ExitCode == 0)
-                    throw new NoImagesException();
-                else
-                    throw new DockerNotRunningException();
-            });
-        }
-
         internal void OpenFolder()
         {
-            System.Diagnostics.Process.Start(Directory.GetCurrentDirectory() + Path.DirectorySeparatorChar + "upload");
+            switch (CurrentInstallerType)
+            {
+                case InstallerType.HYPER_V:
+                    System.Diagnostics.Process.Start(Directory.GetCurrentDirectory() + Path.DirectorySeparatorChar + "upload");
+                    break;
+
+                case InstallerType.NO_HYPER_V:
+                    System.Diagnostics.Process.Start(@"C:\ourstory_content");
+                    break;
+
+            }
         }
         
-
         public bool WiFiSettingsOk { get
             {
                 ManagementClass objMC =
@@ -468,6 +433,14 @@ namespace Bootlegger.App.Lib
         List<ImagesCreateParameters> imagestodownload;
         private int CurrentDownload = 0;
 
+        public string DockerComposeFile
+        {
+            get
+            {
+                return (CurrentInstallerType == InstallerType.HYPER_V) ? "docker-compose.windows.yml" : "docker-compose.toolbox.yml";
+            }
+        }
+
         public async Task DownloadImages(bool forceupdate, CancellationToken cancel)
         {
             if (dockerclient == null)
@@ -494,7 +467,7 @@ namespace Bootlegger.App.Lib
                 imagestodownload = new List<ImagesCreateParameters>();
 
                 //load from yaml:
-                var Document = File.ReadAllText("docker-compose.yml");
+                var Document = File.ReadAllText(DockerComposeFile);
                 var input = new StringReader(Document);
 
                 // Load the stream
@@ -540,10 +513,9 @@ namespace Bootlegger.App.Lib
                             //CurrentDownload++;
                             //OnNextDownload(CurrentDownload, imagestodownload.Count, CurrentDownload / (double)imagestodownload.Count);
                         }
-                        catch
+                        catch (Exception e)
                         {
                             await dockerclient.Images.CreateImageAsync(im, null, this, cancel);
-                            //CurrentDownload++;
                         }
                         finally
                         {
@@ -566,8 +538,9 @@ namespace Bootlegger.App.Lib
         {
             try
             {
-                //TODO: Start Docker
-                await StartDocker(cancel);
+                //Start Docker
+                if (!DockerStarted)
+                    await StartDocker(cancel);
 
                 //TODO: Start Docker Client
                 await StartDockerClient();
@@ -581,7 +554,7 @@ namespace Bootlegger.App.Lib
                 currentProcess = new Process();
                 currentProcess.StartInfo = new ProcessStartInfo("docker-compose");
                 currentProcess.StartInfo.WorkingDirectory = Directory.GetCurrentDirectory();
-                currentProcess.StartInfo.Arguments = "-p bootleggerlocal up -d";
+                currentProcess.StartInfo.Arguments = $"-f {DockerComposeFile} -p bootleggerlocal up -d";
                 //currentProcess.StartInfo.Environment.Add("MYIP", GetLocalIPAddress());
                 currentProcess.StartInfo.UseShellExecute = false;
                 currentProcess.StartInfo.CreateNoWindow = true;
@@ -639,54 +612,127 @@ namespace Bootlegger.App.Lib
             }
         }
 
+        public bool DockerStarted { get; set; }
+
+        public static void AddDirectorySecurity(string FileName, string Account, FileSystemRights Rights, AccessControlType ControlType)
+        {
+            // Create a new DirectoryInfo object.
+            DirectoryInfo dInfo = new DirectoryInfo(FileName);
+
+            // Get a DirectorySecurity object that represents the 
+            // current security settings.
+            DirectorySecurity dSecurity = dInfo.GetAccessControl();
+
+            // Add the FileSystemAccessRule to the security settings. 
+            dSecurity.AddAccessRule(new FileSystemAccessRule(Account,
+                                                            Rights,
+                                                            ControlType));
+
+            // Set the new access settings.
+            dInfo.SetAccessControl(dSecurity);
+
+        }
+
         public async Task StartDocker(CancellationToken cancel)
         {
             switch (CurrentInstallerType)
             {
                 case InstallerType.HYPER_V:
                     Process.Start(@"C:\Program Files\Docker\Docker\Docker for Windows.exe");
-                    //await RunProcessAsync(@"C:\Program Files\Docker\Docker\Docker for Windows.exe");
-
-                    //wait until docker actually started...
-                    var task = Task.Factory.StartNew(() =>
-                    {
-                        bool found = false;
-                        while (!found)
-                        {
-                            try
-                            {
-                                var p = new Process();
-                                p.StartInfo = new ProcessStartInfo()
-                                {
-                                    FileName = "docker",
-                                    Arguments = "info",
-                                    WindowStyle = ProcessWindowStyle.Hidden
-                                };
-                                p.Start();
-                                p.WaitForExit(2000);
-                                if (p.ExitCode == 0)
-                                    found = true;
-                            }
-                            catch (Exception e) {
-                                Console.WriteLine(e.Message);
-                            }
-                            Thread.Sleep(5000);
-                        }
-                    });
-
-                    if (await Task.WhenAny(task, Task.Delay(TimeSpan.FromMinutes(4), cancel)) == task)
-                    {
-                        await task;
-                    }
-                    else
-                    {
-                        throw new TimeoutException();
-                    }
                     break;
 
                 case InstallerType.NO_HYPER_V:
-                    //await RunProcessAsync(@"C:\Program Files\Git\bin\bash.exe" --login -i "C:\Program Files\Docker Toolbox\start.sh");
+
+                    try
+                    {
+                        if (!Directory.Exists(@"C:\ourstory_content"))
+                            Directory.CreateDirectory(@"C:\ourstory_content");
+                        //Directory.SetAccessControl(@"C:\Users\ourstory_content",
+                        AddDirectorySecurity(@"C:\ourstory_content", "Everyone", FileSystemRights.FullControl, AccessControlType.Allow);
+                    }
+                    catch (Exception e)
+                    {
+
+                    }
+
+                    //SET DOCKER BINARY ENV FOR WHEN INSTALLER HAS ONLY JUST RUN...
+                    if (string.IsNullOrEmpty(Environment.GetEnvironmentVariable("DOCKER_TOOLBOX_INSTALL_PATH")))
+                    {
+                        //Environment.SetEnvironmentVariable("DOCKER_TOOLBOX_INSTALL", @"C:\Program Files\Docker Toolbox");
+                        const string name = "PATH";
+                        string pathvar = System.Environment.GetEnvironmentVariable(name);
+                        var value = pathvar + @";C:\Program Files\Docker Toolbox;C:\Program Files\Oracle\VirtualBox\";
+                        Environment.SetEnvironmentVariable(name, value);
+                        Environment.SetEnvironmentVariable("DOCKER_TOOLBOX_INSTALL_PATH", @"C:\Program Files\Docker Toolbox");
+                        Environment.SetEnvironmentVariable("VBOX_MSI_INSTALL_PATH", @"C:\Program Files\Oracle\VirtualBox\");
+                    }
+
+                    var startinfo = new ProcessStartInfo(@"C:\Program Files\Git\bin\bash.exe")
+                    {
+                        Arguments = "-c \" \\\"/c/Program Files/Docker Toolbox/start.sh\\\" \\\"%*\\\"\"",
+                        CreateNoWindow = true,
+                        WindowStyle = ProcessWindowStyle.Hidden
+                    };
+
+                    //wait for docker to start...
+                    var process = Process.Start(startinfo);
+                    await Task.Factory.StartNew(() =>
+                    {
+                        process.WaitForExit();
+                    });
+
+                    //set port forwarding...
+                    Process.Start(new ProcessStartInfo("VBoxManage.exe", "controlvm default natpf1 \"rule1, tcp,, 80,, 80\"")
+                    {
+                        CreateNoWindow = true,
+                        WindowStyle = ProcessWindowStyle.Hidden
+                    }).WaitForExit();
+                    Process.Start(new ProcessStartInfo("VBoxManage.exe", "controlvm default natpf1 \"rule2, tcp,, 27107,, 27017\"")
+                    {
+                        CreateNoWindow = true,
+                        WindowStyle = ProcessWindowStyle.Hidden
+                    }).WaitForExit();
+                    Process.Start(new ProcessStartInfo("VBoxManage.exe", "sharedfolder add default --name \"c/ourstory_content\" --hostpath \"C:\\ourstory_content\\\" --transient --automount")
+                    {
+                        //RedirectStandardOutput = true,
+                        //RedirectStandardError = true,
+                        //UseShellExecute = false
+                        CreateNoWindow = true,
+                        WindowStyle = ProcessWindowStyle.Hidden
+                    }).WaitForExit();
+
+                    DockerStarted = true;
                     break;
+            }
+
+            //wait until docker actually started...
+            var task = Task.Factory.StartNew(async () =>
+            {
+                bool found = false;
+                while (!found)
+                {
+                    try
+                    {
+
+                        await StartDockerClient();
+                        var info = await dockerclient.System.GetSystemInfoAsync();
+                        found = true;
+                    }
+                    catch (Exception e)
+                    {
+                        Console.WriteLine(e.Message);
+                    }
+                    Thread.Sleep(5000);
+                }
+            });
+
+            if (await Task.WhenAny(task, Task.Delay(TimeSpan.FromMinutes(4), cancel)) == task)
+            {
+                await task;
+            }
+            else
+            {
+                throw new TimeoutException();
             }
         }
 
@@ -760,6 +806,7 @@ namespace Bootlegger.App.Lib
             //Debug.WriteLine(value.ProgressMessage);
             if (value.ProgressMessage != null)
             {
+                Debug.WriteLine(value.Progress.Current);
                 //Debug.WriteLine(value.ProgressMessage);
                 Layers[value.ID] = value.Progress.Current / (double)value.Progress.Total;
                 //Console.WriteLine(CurrentDownload);
