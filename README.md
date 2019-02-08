@@ -1,19 +1,19 @@
-# Bootlegger Sync Client
+# Our Story Local Sync Client
 
-This software allows you to keep a local directory up to date with a particular Bootlegger shoot.
+This software allows you to keep a local directory up to date with a particular Our Story shoot.
 
 You will need the following to get setup:
 
-- Administrator rights on a Bootlegger shoot
+- Administrator rights on an Our Story shoot
 - Live internet connection
 
 ## Usage
 
-1. Open Bootlegger Sync Client (and allow ports to be opened locally if requested)
-1. Login to Bootlegger and go to the Export panel of your chosen shoot.
+1. Open Our Story Sync Client (and allow ports to be opened locally if requested)
+1. Login to Our Story and go to the Export panel of your chosen shoot.
 1. Select which export template you wish to apply.
 1. Click 'Connect to Sync Client'
-1. Return to Bootlegger Sync Client
+1. Return to Our Story Sync Client
 1. Select options and press Activate Sync
 
 ## Notes
