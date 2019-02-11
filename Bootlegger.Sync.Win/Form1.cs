@@ -19,7 +19,7 @@ namespace SyncTray
             Load += Form1_Load;
             FormClosed += Form1_FormClosed;
             
-            this.Text = "Bootlegger Sync v" + Engine.VERSION;
+            this.Text = "Our Story Sync v" + Engine.VERSION;
         }
 
 		public void LoadIcon()
@@ -30,7 +30,7 @@ namespace SyncTray
 
         void CurrentDomain_UnhandledException(object sender, UnhandledExceptionEventArgs e)
         {
-            MessageBox.Show("Unfortunatly, Bootlegger Sync has stopped working. Please try again. " + (e.ExceptionObject as Exception).Message);
+            MessageBox.Show("Unfortunatly, Our Story Sync has stopped working. Please try again. " + (e.ExceptionObject as Exception).Message);
             Environment.Exit(0);
         }
 
@@ -120,7 +120,7 @@ namespace SyncTray
 				// {
 				gobtn.Enabled = false;
 				cancelbtn.Enabled = true;
-				transcodechk.Enabled = false;
+				//transcodechk.Enabled = false;
 				applyxmp.Enabled = false;
 				engine.SavePath = path;
 				//gobtn.Text = "Cancel";

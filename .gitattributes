@@ -1,0 +1,5 @@
+*.manifest binary
+*.application binary
+*.deploy binary
+*.msi filter=lfs diff=lfs merge=lfs -text
+*.exe filter=lfs diff=lfs merge=lfs -text

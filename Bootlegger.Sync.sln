@@ -12,8 +12,6 @@ Global
 	GlobalSection(SharedMSBuildProjectFiles) = preSolution
 		Bootlegger.Sync.Lib\Bootlegger.Sync.Lib.projitems*{12e9e21a-f9db-4819-9d3a-a0a1500829a0}*SharedItemsImports = 13
 		Bootlegger.Sync.Lib\Bootlegger.Sync.Lib.projitems*{6122f7ae-7f5d-49b7-b2da-078c458a0749}*SharedItemsImports = 4
-		Bootlegger.Application.Lib\Bootlegger.Application.Lib.projitems*{90c52f7f-6bb0-4c96-a303-f3f8dccf7bc5}*SharedItemsImports = 4
-		Bootlegger.Application.Lib\Bootlegger.Application.Lib.projitems*{e5823482-93cc-4f26-9c35-4a1efe2da35f}*SharedItemsImports = 13
 		Bootlegger.Sync.Lib\Bootlegger.Sync.Lib.projitems*{f921ab2c-7e39-4ec4-aa24-af33d8625b59}*SharedItemsImports = 4
 	EndGlobalSection
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution

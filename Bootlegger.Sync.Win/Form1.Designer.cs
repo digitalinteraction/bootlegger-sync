@@ -48,7 +48,6 @@
             this.panel2 = new System.Windows.Forms.Panel();
             this.panel3 = new System.Windows.Forms.Panel();
             this.applyxmp = new System.Windows.Forms.CheckBox();
-            this.transcodechk = new System.Windows.Forms.CheckBox();
             this.tableLayoutPanel1.SuspendLayout();
             this.panel1.SuspendLayout();
             this.panel2.SuspendLayout();
@@ -61,10 +60,10 @@
             this.label1.Location = new System.Drawing.Point(22, 16);
             this.label1.Margin = new System.Windows.Forms.Padding(6, 0, 6, 0);
             this.label1.Name = "label1";
-            this.label1.Size = new System.Drawing.Size(968, 25);
+            this.label1.Size = new System.Drawing.Size(958, 25);
             this.label1.TabIndex = 0;
-            this.label1.Text = "To Connect, Login to Bootlegger and Click the \'Connect and Sync with Local Client" +
-    "\' button in the Export screen";
+            this.label1.Text = "To Connect, Login to Our Story and Click the \'Connect and Sync with Local Client\'" +
+    " button in the Export screen";
             // 
             // status
             // 
@@ -292,23 +291,11 @@
             this.applyxmp.Text = "Apply XMP Meta-Data (creates backup)";
             this.applyxmp.UseVisualStyleBackColor = true;
             // 
-            // transcodechk
-            // 
-            this.transcodechk.AutoSize = true;
-            this.transcodechk.Location = new System.Drawing.Point(426, 118);
-            this.transcodechk.Margin = new System.Windows.Forms.Padding(6);
-            this.transcodechk.Name = "transcodechk";
-            this.transcodechk.Size = new System.Drawing.Size(186, 29);
-            this.transcodechk.TabIndex = 17;
-            this.transcodechk.Text = "Transcode to HD";
-            this.transcodechk.UseVisualStyleBackColor = true;
-            // 
             // Form1
             // 
             this.AutoScaleDimensions = new System.Drawing.SizeF(11F, 24F);
             this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font;
             this.ClientSize = new System.Drawing.Size(1135, 488);
-            this.Controls.Add(this.transcodechk);
             this.Controls.Add(this.applyxmp);
             this.Controls.Add(this.tableLayoutPanel1);
             this.Controls.Add(this.label2);
@@ -325,7 +312,7 @@
             this.MaximizeBox = false;
             this.Name = "Form1";
             this.SizeGripStyle = System.Windows.Forms.SizeGripStyle.Show;
-            this.Text = "Bootlegger SyncTool";
+            this.Text = "Our Story Sync";
             this.tableLayoutPanel1.ResumeLayout(false);
             this.panel1.ResumeLayout(false);
             this.panel1.PerformLayout();
@@ -359,7 +346,6 @@
         private System.Windows.Forms.Panel panel2;
         private System.Windows.Forms.Panel panel3;
         private System.Windows.Forms.CheckBox applyxmp;
-        private System.Windows.Forms.CheckBox transcodechk;
     }
 }
 
