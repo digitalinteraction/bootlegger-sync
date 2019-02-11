@@ -3,13 +3,13 @@
 <plist version="1.0">
 <dict>
 	<key>CFBundleName</key>
-	<string>Bootlegger Sync</string>
+	<string>Our Story Sync</string>
 	<key>CFBundleIdentifier</key>
 	<string>tv.bootlegger.sync.mac</string>
 	<key>CFBundleShortVersionString</key>
 	<string>1.0</string>
 	<key>LSMinimumSystemVersion</key>
-	<string>10.7</string>
+	<string>10.10</string>
 	<key>CFBundleDevelopmentRegion</key>
 	<string>en</string>
 	<key>CFBundleInfoDictionaryVersion</key>
@@ -24,9 +24,9 @@
 	<string>Main</string>
 	<key>LSApplicationCategoryType</key>
 	<string>public.app-category.video</string>
-	<key>XSAppIconAssets</key>
-	<string>Assets.xcassets/AppIcons.appiconset</string>
 	<key>CFBundleVersion</key>
 	<string>2</string>
+	<key>XSAppIconAssets</key>
+	<string>Assets.xcassets/AppIcon.appiconset</string>
 </dict>
 </plist>

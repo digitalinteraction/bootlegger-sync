@@ -7,11 +7,9 @@ using System.Linq;
 using System.Net;
 using System.Threading;
 using System.Threading.Tasks;
-using Amazon.ElasticTranscoder.Model;
 using Newtonsoft.Json;
 using Newtonsoft.Json.Linq;
 using RestSharp;
-using S3Downloader;
 
 namespace Bootlegger.Sync.Lib
 {
@@ -143,101 +141,62 @@ namespace Bootlegger.Sync.Lib
 			//for each sub, make that too
 		}
 
-		public bool ShouldTranscode { get; set; }
+		//public bool ShouldTranscode { get; set; }
 		public bool ShouldApplyXMP { get; set; }
 
-		void DownloadFile(string filename, string dest, string id)
+        public async Task DownloadFileInBackground(string src, string dst, CancellationToken cancel)
+        {
+            WebClient client = new WebClient();
+            client.Headers.Add(HttpRequestHeader.Cookie, "sails.sid=" + Uri.EscapeDataString(thesession).Replace("%20", "%2B"));
+            cancel.Register(client.CancelAsync);
+            Uri uri = new Uri(src);
+
+            // Specify that the DownloadFileCallback method gets called
+            // when the download completes.
+            //client.DownloadFileCompleted += new AsyncCompletedEventHandler(DownloadFileCallback2);
+            // Specify a progress notification handler.
+            client.DownloadProgressChanged += (o, e) =>
+            {
+                worker.ReportProgress((int)(((done + ((double)e.ProgressPercentage / 100)) / (double)thetotal) * 100));
+                OnSubProgress?.Invoke(e.ProgressPercentage);
+            };
+            client.DownloadFileCompleted += Client_DownloadFileCompleted;
+            await client.DownloadFileTaskAsync(uri, dst);
+        }
+
+        void Client_DownloadFileCompleted(object sender, AsyncCompletedEventArgs e)
+        {
+            Console.WriteLine(e.Error);
+        }
+
+        void DownloadFile(string filename, string dest, string id)
 		{
 			try
 			{
 				//TODO Change back to bootleggertrans
-				AWSS3Helper helper;
+				//AWSS3Helper helper;
 
-				if (ShouldTranscode)
-					helper = new AWSS3Helper(Settings.S3ID, Settings.S3KEY, Settings.S3TRANSCODEBUCKET, Settings.S3REGION);
-				else
-					helper = new AWSS3Helper(Settings.S3ID, Settings.S3KEY, Settings.S3BUCKET, Settings.S3REGION);
+				//if (ShouldTranscode)
+					//helper = new AWSS3Helper(Settings.S3ID, Settings.S3KEY, Settings.S3TRANSCODEBUCKET, Settings.S3REGION);
+				//else
+				//helper = new AWSS3Helper(Settings.S3ID, Settings.S3KEY, Settings.S3BUCKET, Settings.S3REGION);
                 
 				//meta data for media item
 				var themeta = (from n in metadata.Children() where n["id"].ToString() == id select n).First() as JObject;
 				//string origpath = "";
 				var origpath = themeta["path"].ToString();
-				//if (filename.Split('/').Count() > 0)
-				//    origpath = filename.Split('/').Last();
-
-				/** INIT HOMOG IF NEEDED: **/
-				if (themeta["meta"]["static_meta"]["media_type"].ToString() == "VIDEO")
-				{
-
-					//replace normal url with transcode url
-					if (ShouldTranscode)
-					{
-						origpath += "_homog.mp4";
-
-						RestRequest req = new RestRequest("/media/homog/" + id, RestSharp.Method.HEAD);
-						RestClient client = new RestClient();
-
-						client.FollowRedirects = true;
-						client.BaseUrl = new Uri(theport + "//" + thehostname);
-						req.AddCookie("sails.sid", Uri.EscapeDataString(thesession).Replace("%20", "%2B"));
-						var res = client.Execute(req);
-						if (res.StatusCode != HttpStatusCode.OK)
-						{
-							//make homog
-							RestSharp.RestRequest request = new RestSharp.RestRequest("/media/transcodefile/?filename=" + Uri.EscapeDataString(origpath) + "&apikey=" + Settings.APIKEY);
-							request.AddCookie("sails.sid", Uri.EscapeDataString(thesession).Replace("%20", "%2B"));
-							var job = client.Execute(request);
-
-							var interim = JsonConvert.DeserializeObject<Hashtable>(job.Content);
-							if (interim.ContainsKey("jobid"))
-							{
-								var jobresult = interim["jobid"].ToString();
-
-								Amazon.ElasticTranscoder.AmazonElasticTranscoderClient elastic = new Amazon.ElasticTranscoder.AmazonElasticTranscoderClient(Settings.S3ID, Settings.S3KEY, Settings.S3REGION);
-
-								bool done = false;
-								while (!done)
-								{
-									Thread.Sleep(2000);
-									Task<ReadJobResponse> task = elastic.ReadJobAsync(new ReadJobRequest() { Id = jobresult });
-									task.Wait();
-									var j = task.Result;
-									//ReadJobResponse j = Task<ReadJobResponse>.WaitAll(task);
-									//var j = elastic.ReadJob(new ReadJobRequest() { Id = jobresult });
-									if (j.Job.Status == "Complete" || j.Job.Status == "Error")
-									{
-										Console.WriteLine(j.Job.Status);
-										done = true;
-									}
-								}
-							}
-							else
-							{
-								//failed to create transcode...
-							}
-						}
-						else
-						{
-							Console.WriteLine("transcoded file exists");
-						}
-					}
-				}
-
+			
 				if (worker.CancellationPending)
 					return;
 
 				try
 				{
 
-					helper.OnProgress += helper_OnProgress;
-					if (ShouldTranscode)
-						helper.DownloadFile("upload", themeta["path"].ToString() + "_homog.mp4", new FileInfo(dest).DirectoryName, new FileInfo(dest).Name + ".part", false, true);
-					else
-						helper.DownloadFile("upload", themeta["path"].ToString(), new FileInfo(dest).DirectoryName, new FileInfo(dest).Name + ".part", false, true);
+                    Task.WaitAll(DownloadFileInBackground($"{theport}//{thehostname}/media/full/{id}?apikey={ Settings.APIKEY }", Path.Combine(new FileInfo(dest).DirectoryName, new FileInfo(dest).Name + ".part"),new CancellationToken()));
 
-					//helper.DownloadFile("upload", origpath +"_homog.mp4", new FileInfo(dest).DirectoryName, new FileInfo(dest).Name + ".part", false, false);
+                    //helper.DownloadFile("upload", origpath +"_homog.mp4", new FileInfo(dest).DirectoryName, new FileInfo(dest).Name + ".part", false, false);
 
-					File.Move(dest + ".part", dest);
+                    File.Move(dest + ".part", dest);
 					//write xmp to the file:
 
 					ProcessStartInfo info = new ProcessStartInfo();
@@ -333,11 +292,11 @@ namespace Bootlegger.Sync.Lib
 		public event Action<int> OnProgress;
 		public event Action<int> OnSubProgress;
 
-		void helper_OnProgress(object sender, Amazon.S3.Model.WriteObjectProgressArgs e)
-		{
-            worker.ReportProgress((int)(((done + ((double)e.PercentDone / 100)) / (double)thetotal) * 100));
-			OnSubProgress?.Invoke(e.PercentDone);
-		}
+		//void helper_OnProgress(object sender, Amazon.S3.Model.WriteObjectProgressArgs e)
+		//{
+  //          worker.ReportProgress((int)(((done + ((double)e.PercentDone / 100)) / (double)thetotal) * 100));
+		//	OnSubProgress?.Invoke(e.PercentDone);
+		//}
 
 		async Task DoRefresh()
 		{

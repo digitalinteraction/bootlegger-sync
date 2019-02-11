@@ -113,11 +113,11 @@ namespace Bootlegger.Sync.Mac
 						View.Window.SetTitleWithRepresentedFilename(Path.GetFileName(path));
 						View.Window.RepresentedUrl = url;
 						engine.SavePath = path;
-						engine.ShouldTranscode = (transcode.State == NSCellStateValue.On);
+						//engine.ShouldTranscode = (transcode.State == NSCellStateValue.On);
 						engine.ShouldApplyXMP = (xmp.State == NSCellStateValue.On);
 						engine.StartSync();
 						cancelbtn.Enabled = true;
-						transcode.Enabled = false;
+						//transcode.Enabled = false;
 						xmp.Enabled = false;
 						gobtn.Enabled = false;
 
@@ -146,7 +146,7 @@ namespace Bootlegger.Sync.Mac
 			}
 
 			not.Title = "Sync Complete";
-			not.InformativeText = "Your Bootlegger Shoot is Up-to-Date";
+			not.InformativeText = "Your Our Story Shoot is Up-to-Date";
 			not.DeliveryDate = (NSDate)DateTime.Now;
 			not.SoundName = NSUserNotification.NSUserNotificationDefaultSoundName;
 
@@ -175,7 +175,7 @@ namespace Bootlegger.Sync.Mac
 		public override void ViewWillAppear()
 		{
 			base.ViewWillAppear();
-			View.Window.Title = "Bootlegger Sync v" + Engine.VERSION;
+			View.Window.Title = "Our Story Sync v" + Engine.VERSION;
 			View.Window.Delegate = new MyWindowDelegate(engine);
 		}
 

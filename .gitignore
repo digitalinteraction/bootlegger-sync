@@ -262,3 +262,6 @@ paket-files/
 *.sln.iml
 *.exe
 *.tar
+*.pkg
+*.app
+!installs/*
