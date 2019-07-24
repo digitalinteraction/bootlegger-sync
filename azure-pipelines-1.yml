@@ -7,10 +7,10 @@ trigger:
 - master
 
 pool:
-  vmImage: 'windows-latest'
+  vmImage: 'macOS-10.14'
 
 variables:
-  solution: '**/Bootlegger.Sync.Win.csproj'
+  solution: '**/*.sln'
   buildPlatform: 'Any CPU'
   buildConfiguration: 'Release'
 
