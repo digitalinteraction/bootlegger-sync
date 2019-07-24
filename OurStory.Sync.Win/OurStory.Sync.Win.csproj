@@ -27,7 +27,7 @@
     <UpdatePeriodically>false</UpdatePeriodically>
     <UpdateRequired>false</UpdateRequired>
     <MapFileExtensions>true</MapFileExtensions>
-    <InstallUrl>https://github.com/digitalinteraction/ourstory-desktop/raw/master/installs/</InstallUrl>
+    <InstallUrl>https://github.com/our-story-media/ourstory-desktop/raw/master/installs/</InstallUrl>
     <SupportUrl>https://guide.ourstory.video</SupportUrl>
     <ProductName>Our Story Sync</ProductName>
     <PublisherName>Newcastle University</PublisherName>

@@ -1,4 +1,4 @@
-﻿namespace OurStory
+﻿namespace OurStory.Sync.Win
 {
     partial class Form1
     {

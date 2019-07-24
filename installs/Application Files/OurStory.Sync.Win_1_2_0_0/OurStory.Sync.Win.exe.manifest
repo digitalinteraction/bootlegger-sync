@@ -55,14 +55,14 @@
     </dependentAssembly>
   </dependency>
   <dependency>
-    <dependentAssembly dependencyType="install" allowDelayedBinding="true" codebase="OurStory.Sync.Win.exe" size="193536">
+    <dependentAssembly dependencyType="install" allowDelayedBinding="true" codebase="OurStory.Sync.Win.exe" size="123392">
       <assemblyIdentity name="OurStory.Sync.Win" version="1.0.0.0" language="neutral" processorArchitecture="msil" />
       <hash>
         <dsig:Transforms>
           <dsig:Transform Algorithm="urn:schemas-microsoft-com:HashTransforms.Identity" />
         </dsig:Transforms>
         <dsig:DigestMethod Algorithm="http://www.w3.org/2000/09/xmldsig#sha256" />
-        <dsig:DigestValue>y504DgOvHlCjbW/FIQGid7/AgZql1I/Y31ddJl2hgmY=</dsig:DigestValue>
+        <dsig:DigestValue>aiWRhrRRQuoHxYh61aCCFr4rv9qk6vYZ+6in49wc5hE=</dsig:DigestValue>
       </hash>
     </dependentAssembly>
   </dependency>
