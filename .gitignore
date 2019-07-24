@@ -265,3 +265,5 @@ paket-files/
 *.pkg
 *.app
 !installs/*
+
+APIKEY
