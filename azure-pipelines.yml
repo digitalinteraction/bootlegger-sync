@@ -18,7 +18,8 @@ steps:
 
 - task: CopyFiles@2
   inputs:
-    contents: $(APIKEY.secureFilePath)
+    sourceFolder: $(Agent.BuildDirectory)
+    contents: '**/APIKEY'
     targetFolder: $(Build.SourcesDirectory)/OurStory.Sync.Lib/APIKEY
 
 - task: MSBuild@1
