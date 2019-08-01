@@ -11,6 +11,16 @@ steps:
   inputs:
     restoreSolution: '**/*.sln'
 
+- task: DownloadSecureFile@1
+  name: APIKEY
+  inputs:
+    secureFile: 'APIKEY'
+
+- task: CopyFiles@2
+  inputs:
+    contents: $(APIKEY.secureFilePath)
+    targetFolder: $(Build.SourcesDirectory)/OurStory.Sync.Lib/APIKEY
+
 - task: MSBuild@1
   inputs:
     solution: '**/*.sln'
