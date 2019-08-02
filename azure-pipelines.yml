@@ -18,7 +18,7 @@ steps:
 
 - task: CopyFiles@2
   inputs:
-    sourceFolder: $(Agent.BuildDirectory)
+    sourceFolder: $(Agent.TempDirectory)
     contents: '**/APIKEY'
     targetFolder: $(Build.SourcesDirectory)/OurStory.Sync.Lib/APIKEY
 
