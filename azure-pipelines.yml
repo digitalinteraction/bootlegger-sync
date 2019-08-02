@@ -1,28 +1,74 @@
 trigger:
 - master
 
-pool:
-  vmImage: 'macos-latest'
+jobs:
+- job: Windows
+  pool:
+    vmImage: 'windows'
+  steps:
+  - task: NuGetToolInstaller@1
 
-steps:
-- task: NuGetToolInstaller@1
+  - task: NuGetCommand@2
+    inputs:
+      restoreSolution: '**/*.sln'
 
-- task: NuGetCommand@2
-  inputs:
-    restoreSolution: '**/*.sln'
+  - task: DownloadSecureFile@1
+    name: APIKEY
+    inputs:
+      secureFile: 'APIKEY'
 
-- task: DownloadSecureFile@1
-  name: APIKEY
-  inputs:
-    secureFile: 'APIKEY'
+  - task: CopyFiles@2
+    inputs:
+      sourceFolder: $(Agent.TempDirectory)
+      contents: '**/APIKEY'
+      targetFolder: $(Build.SourcesDirectory)/OurStory.Sync.Lib
 
-- task: CopyFiles@2
-  inputs:
-    sourceFolder: $(Agent.TempDirectory)
-    contents: '**/APIKEY'
-    targetFolder: $(Build.SourcesDirectory)/OurStory.Sync.Lib
+  - task: MSBuild@1
+    inputs:
+      solution: '**/*.sln'
+      configuration: 'Win'
+    
+  - task: MSBuild@1
+    inputs:
+      solution: '**/*.sln'
+      configuration: 'Win'
+      msbuildArguments: '/target:publish'
 
-- task: MSBuild@1
-  inputs:
-    solution: '**/*.sln'
-    configuration: 'Mac'
+- job: Mac
+  pool:
+    vmImage: 'macOS-latest'
+  steps:
+  - task: NuGetToolInstaller@1
+
+  - task: NuGetCommand@2
+    inputs:
+      restoreSolution: '**/*.sln'
+
+  - task: DownloadSecureFile@1
+    name: APIKEY
+    inputs:
+      secureFile: 'APIKEY'
+
+  - task: CopyFiles@2
+    inputs:
+      sourceFolder: $(Agent.TempDirectory)
+      contents: '**/APIKEY'
+      targetFolder: $(Build.SourcesDirectory)/OurStory.Sync.Lib
+
+  - task: MSBuild@1
+    inputs:
+      solution: '**/*.sln'
+      configuration: 'Mac'
+
+  - task: GitHubRelease@0
+    inputs:
+      gitHubConnection: 'OurStory GitHub'
+      repositoryName: 'our-story-media/ourstory-desktop'
+      action: 'create'
+      title: 'Our Story Sync Client'
+      addChangeLog: false
+      assets: '**/*.pkg'
+
+
+
+
