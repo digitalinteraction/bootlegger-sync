@@ -1,3 +1,5 @@
+[![Build Status](https://dev.azure.com/ourstorytitan/OurStoryBuilds/_apis/build/status/our-story-media.ourstory-desktop?branchName=master)](https://dev.azure.com/ourstorytitan/OurStoryBuilds/_build/latest?definitionId=8&branchName=master)
+
 # Our Story Local Sync Client
 
 This software allows you to keep a local directory up to date with a particular Our Story shoot.

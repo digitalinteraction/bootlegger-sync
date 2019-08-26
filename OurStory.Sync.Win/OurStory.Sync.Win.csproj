@@ -149,9 +149,6 @@
     <None Include="Properties\app.manifest" />
   </ItemGroup>
   <ItemGroup>
-    <Content Include="exiftool.exe">
-      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
-    </Content>
     <Content Include="favicon.ico" />
     <Content Include="web_hi_res_512_r0a_icon.ico" />
   </ItemGroup>
