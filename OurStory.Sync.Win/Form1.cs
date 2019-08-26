@@ -19,7 +19,7 @@ namespace OurStory.Sync.Win
             Load += Form1_Load;
             FormClosed += Form1_FormClosed;
             
-            this.Text = "Our Story Sync v" + Engine.VERSION;
+            this.Text = "Indaba Sync v" + Engine.VERSION;
         }
 
 		public void LoadIcon()
@@ -30,7 +30,7 @@ namespace OurStory.Sync.Win
 
         void CurrentDomain_UnhandledException(object sender, UnhandledExceptionEventArgs e)
         {
-            MessageBox.Show("Unfortunatly, Our Story Sync has stopped working. Please try again. " + (e.ExceptionObject as Exception).Message);
+            MessageBox.Show("Unfortunatly, Indaba Sync has stopped working. Please try again. " + (e.ExceptionObject as Exception).Message);
             Environment.Exit(0);
         }
 

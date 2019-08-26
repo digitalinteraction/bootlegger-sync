@@ -3,7 +3,7 @@
 <plist version="1.0">
 <dict>
 	<key>CFBundleName</key>
-	<string>Our Story Sync</string>
+	<string>Indaba Sync</string>
 	<key>CFBundleShortVersionString</key>
 	<string>1.1</string>
 	<key>LSMinimumSystemVersion</key>
@@ -27,6 +27,6 @@
 	<key>CFBundleVersion</key>
 	<string>3</string>
 	<key>CFBundleIdentifier</key>
-	<string>dev.ourstory.sync.mac</string>
+	<string>dev.indaba.sync.mac</string>
 </dict>
 </plist>

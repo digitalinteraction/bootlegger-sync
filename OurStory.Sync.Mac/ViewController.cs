@@ -146,7 +146,7 @@ namespace OurStory.Sync.Mac
             }
 
             not.Title = "Sync Complete";
-            not.InformativeText = "Your Our Story Shoot is Up-to-Date";
+            not.InformativeText = "Your Indaba Shoot is Up-to-Date";
             not.DeliveryDate = (NSDate)DateTime.Now;
             not.SoundName = NSUserNotification.NSUserNotificationDefaultSoundName;
 
@@ -175,7 +175,7 @@ namespace OurStory.Sync.Mac
         public override void ViewWillAppear()
         {
             base.ViewWillAppear();
-            View.Window.Title = "Our Story Sync v" + Engine.VERSION;
+            View.Window.Title = "Indaba Sync v" + Engine.VERSION;
             View.Window.Delegate = new MyWindowDelegate(engine);
         }
 

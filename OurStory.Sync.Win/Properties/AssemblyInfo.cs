@@ -5,12 +5,12 @@ using System.Runtime.InteropServices;
 // General Information about an assembly is controlled through the following 
 // set of attributes. Change these attribute values to modify the information
 // associated with an assembly.
-[assembly: AssemblyTitle("Bootlegger Sync")]
+[assembly: AssemblyTitle("Indaba Sync")]
 [assembly: AssemblyDescription("Local sync client for Bootlegger")]
 [assembly: AssemblyConfiguration("")]
-[assembly: AssemblyCompany("Newcastle University")]
-[assembly: AssemblyProduct("Bootlegger Sync")]
-[assembly: AssemblyCopyright("Copyright Newcastle University ©  2015")]
+[assembly: AssemblyCompany("Monash University")]
+[assembly: AssemblyProduct("Indaba Sync")]
+[assembly: AssemblyCopyright("Copyright Monash University ©  2019")]
 [assembly: AssemblyTrademark("")]
 [assembly: AssemblyCulture("")]
 

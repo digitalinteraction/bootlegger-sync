@@ -62,7 +62,7 @@
             this.label1.Name = "label1";
             this.label1.Size = new System.Drawing.Size(958, 25);
             this.label1.TabIndex = 0;
-            this.label1.Text = "To Connect, Login to Our Story and Click the \'Connect and Sync with Local Client\'" +
+            this.label1.Text = "To Connect, Login to Indaba and Click the \'Connect and Sync with Local Client\'" +
     " button in the Export screen";
             // 
             // status
@@ -312,7 +312,7 @@
             this.MaximizeBox = false;
             this.Name = "Form1";
             this.SizeGripStyle = System.Windows.Forms.SizeGripStyle.Show;
-            this.Text = "Our Story Sync";
+            this.Text = "Indaba Sync";
             this.tableLayoutPanel1.ResumeLayout(false);
             this.panel1.ResumeLayout(false);
             this.panel1.PerformLayout();
